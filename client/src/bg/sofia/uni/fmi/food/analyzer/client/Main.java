@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.food.analyzer;
+package bg.sofia.uni.fmi.food.analyzer.client;
 
 public class Main {
 
