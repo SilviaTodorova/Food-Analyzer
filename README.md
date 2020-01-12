@@ -13,6 +13,9 @@
 # Food Analyzer Server
 
 [FoodData Central API Guide](https://fdc.nal.usda.gov/api-guide.html)
+[FoodData Search](https://fdc.nal.usda.gov/fdc-app.html#/)
+[UPC codes and images](https://www.upcitemdb.com/upc/milka)
+[upc chia example](https://www.upcitemdb.com/upc/856220004034)
 
 > api key: XQhDTxbht58sQOKHtTmpwV2EE9GFtvPLaiI8vtVO
 
