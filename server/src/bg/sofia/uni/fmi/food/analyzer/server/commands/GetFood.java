@@ -1,15 +1,13 @@
 package bg.sofia.uni.fmi.food.analyzer.server.commands;
 
-import bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants;
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
-import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants.*;
 
@@ -28,7 +26,7 @@ public class GetFood implements Command {
     }
 
     @Override
-    public String execute(List<String> parameters) {
+    public String execute(List<String> parameters) throws IOException, InterruptedException {
         validateInput(parameters);
 
         parseParameters(parameters);
@@ -40,12 +38,11 @@ public class GetFood implements Command {
                 .append(System.lineSeparator())
                 .append(System.lineSeparator());
 
-        List<Food> foods = new ArrayList<>();
         if (repository.checkFoodExistByName(name)) {
             return builder.append(repository.getFoodByName(name)).toString();
         }
 
-        foods.addAll(client.getFoodByName(name));
+        List<Food> foods = new ArrayList<>(client.getFoodByName(name));
         String response = formatExecutionResult(foods);
         repository.saveFoodReportByName(name, response);
 

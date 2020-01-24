@@ -41,15 +41,6 @@ public class FoodAnalyzerServer {
 
     public void test() {
         List<String> cmds = new ArrayList<>();
-//        cmds.add("get-food-report 415269");
-//        cmds.add("get-food-by-barcode --img=D:\\JavaProjects\\ModernJavaTechnology\\food-analyzer\\server\\resources\\apple.png");
-//        cmds.add("get-food-by-barcode --img=D:\\JavaProjects\\ModernJavaTechnology\\food-analyzer\\server\\resources\\apple.png");
-//        cmds.add("get-food-by-barcode --code=009800146130");
-//        cmds.add("get-food-report 539572");
-//        cmds.add("get-food-report 415269");
-//        cmds.add("get-food-by-barcode --code=009800146130");
-//        cmds.add("get-food raffaello treat");
-//        cmds.add("get-food raffaello treat");
 
        cmds.add("get-food beef noodle soup");
        cmds.add("get-food-report 415269");
@@ -59,7 +50,14 @@ public class FoodAnalyzerServer {
             String commandName = commandParser.parseCommand(commandAsString);
             Command command = commandFactory.createCommand(commandName, repository, clientFood);
             List<String> parameters = commandParser.parseParameters(commandAsString);
-            String executionResult = command.execute(parameters);
+
+            String executionResult;
+            try {
+                executionResult = command.execute(parameters);
+            } catch (Exception ex) {
+                executionResult = ex.getMessage();
+            }
+
             System.out.println(executionResult);
         }
     }
@@ -143,7 +141,7 @@ public class FoodAnalyzerServer {
         }
     }
 
-    private void processCommand(String commandAsString, SocketChannel sc, ByteBuffer buffer) throws IOException {
+    private void processCommand(String commandAsString, SocketChannel sc, ByteBuffer buffer) throws IOException, InterruptedException {
         if (commandAsString == null || commandAsString.trim().equals("")) {
             throw new IllegalArgumentException(COMMAND_CANNOT_BE_NULL_OR_EMPTY);
         }
@@ -153,7 +151,7 @@ public class FoodAnalyzerServer {
         List<String> parameters = commandParser.parseParameters(commandAsString);
         String executionResult = command.execute(parameters);
 
-        if (command.equals(DISCONNECT_COMMAND)) {
+        if (commandName.equals(DISCONNECT_COMMAND)) {
             sc.close();
         }
 

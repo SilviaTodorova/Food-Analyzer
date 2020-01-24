@@ -3,12 +3,11 @@ package bg.sofia.uni.fmi.food.analyzer.server.commands;
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
-import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 import bg.sofia.uni.fmi.food.analyzer.server.models.FoodReport;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Nutrient;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 
 import static bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants.*;
@@ -19,18 +18,16 @@ public class GetFoodReport implements Command {
 
     private final FoodRepository repository;
     private final FoodClient client;
-    private final Gson gson;
 
     private Long id;
 
     public GetFoodReport(FoodRepository repository, FoodClient client) {
         this.repository = repository;
         this.client = client;
-        this.gson = new Gson();
     }
 
     @Override
-    public String execute(List<String> parameters) {
+    public String execute(List<String> parameters) throws IOException, InterruptedException {
         validateInput(parameters);
 
         parseParameters(parameters);
@@ -42,7 +39,7 @@ public class GetFoodReport implements Command {
                 .append(System.lineSeparator())
                 .append(System.lineSeparator());
 
-        FoodReport report = null;
+        FoodReport report;
         if (repository.checkFoodExistById(id)) {
             return builder.append(repository.getFoodById(id)).toString();
         }
@@ -74,6 +71,7 @@ public class GetFoodReport implements Command {
             return NO_FOODS_WERE_FOUND_MESSAGE;
         }
 
+        // TODO:
         StringBuilder builder = new StringBuilder();
         append(builder, DESCRIPTION_FIELD, String.valueOf(report.getDescription()));
         append(builder, INCREDIENTS_FIELD, String.valueOf(report.getIngredients()));

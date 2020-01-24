@@ -1,16 +1,13 @@
 package bg.sofia.uni.fmi.food.analyzer.server.commands;
 
-import bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants;
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
-import bg.sofia.uni.fmi.food.analyzer.server.models.FoodReport;
-import bg.sofia.uni.fmi.food.analyzer.server.models.Nutrient;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants.*;
 import static bg.sofia.uni.fmi.food.analyzer.server.core.BarcodeConverter.decodeBarcodeImage;
@@ -34,7 +31,7 @@ public class GetFoodByBarcode implements Command {
     }
 
     @Override
-    public String execute(List<String> parameters) {
+    public String execute(List<String> parameters) throws IOException {
         validateInput(parameters);
 
         parseParameters(parameters);
@@ -46,12 +43,11 @@ public class GetFoodByBarcode implements Command {
                 .append(System.lineSeparator())
                 .append(System.lineSeparator());
 
-        List<Food> foods = new ArrayList<>();
         if (repository.checkFoodExistByBarcode(barcode)) {
             return builder.append(repository.getFoodByBarcode(barcode)).toString();
         }
 
-        foods.addAll(client.getFoodByBarcode(barcode));
+        List<Food> foods = new ArrayList<>(client.getFoodByBarcode(barcode));
         String response = formatExecutionResult(foods);
         repository.saveFoodReportByBarcode(barcode, response);
         return builder.append(response).toString();
