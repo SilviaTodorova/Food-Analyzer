@@ -1,0 +1,18 @@
+CLASS PRODUCT
+-------------
+fdcId: long
+name: String 
+ingedients: String[]
+calories: double
+protein
+fat
+carbohydrate
+fiber
+---------
+description
+type
+
+
+
+SEARCH BY PRODUCT NAME
+
