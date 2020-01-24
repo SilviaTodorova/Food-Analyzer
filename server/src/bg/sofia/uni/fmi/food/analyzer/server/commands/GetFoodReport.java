@@ -1,13 +1,12 @@
 package bg.sofia.uni.fmi.food.analyzer.server.commands;
 
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
-import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClient;
+import bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants;
+import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClientImpl;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.models.FoodReport;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Nutrient;
-import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.util.List;
 
 import static bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants.*;
@@ -17,17 +16,17 @@ public class GetFoodReport implements Command {
     private static final String GET_FOOD_REPORT = "get-food-report";
 
     private final FoodRepository repository;
-    private final FoodClient client;
+    private final FoodClientImpl client;
 
     private Long id;
 
-    public GetFoodReport(FoodRepository repository, FoodClient client) {
+    public GetFoodReport(FoodRepository repository, FoodClientImpl client) {
         this.repository = repository;
         this.client = client;
     }
 
     @Override
-    public String execute(List<String> parameters) throws IOException, InterruptedException {
+    public String execute(List<String> parameters) {
         validateInput(parameters);
 
         parseParameters(parameters);
@@ -71,25 +70,19 @@ public class GetFoodReport implements Command {
             return NO_FOODS_WERE_FOUND_MESSAGE;
         }
 
-        // TODO:
         StringBuilder builder = new StringBuilder();
-        append(builder, DESCRIPTION_FIELD, String.valueOf(report.getDescription()));
-        append(builder, INCREDIENTS_FIELD, String.valueOf(report.getIngredients()));
+        append(builder, GlobalConstants.DESC_FIELD, report.getDescription());
+        append(builder, GlobalConstants.INGREDIENTS_FIELD, report.getIngredients());
 
         for (Nutrient nut : report.getLabelNutrients()) {
-            if(nut.getName().equals("calories")
-               || nut.getName().equals("protein")
-               || nut.getName().equals("fat")
-               || nut.getName().equals("carbohydrates")
-               || nut.getName().equals("fiber")) {
-                append(builder, nut.getName(), String.format("%.2f", nut.getValue()));
-            }
+            builder.append(nut.getName()).append(": ").append(String.format("%.2f", nut.getValue())).append(System.lineSeparator());
         }
+
         return builder.toString();
     }
 
     private void append(StringBuilder builder, String field, String value) {
-        if (!value.equals("null") && !value.equals("")) {
+        if (!GlobalConstants.IS_NULL_OR_EMPTY_FIELD_PREDICATE.test(value)) {
             builder.append(field).append(": ").append(value).append(System.lineSeparator());
         }
     }

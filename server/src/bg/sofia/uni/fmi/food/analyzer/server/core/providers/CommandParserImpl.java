@@ -6,16 +6,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.DELIMITER;
+
 public class CommandParserImpl implements CommandParser {
     @Override
     public String parseCommand(String fullCommand) {
-        return fullCommand.split(" ")[0];
+        return fullCommand.split(DELIMITER)[0];
     }
 
     public List<String> parseParameters(String fullCommand) {
-        String[] commandParts = fullCommand.split(" ");
-        ArrayList<String> parameters = new ArrayList<>();
-        parameters.addAll(Arrays.asList(commandParts).subList(1, commandParts.length));
+        String[] commandParts = fullCommand.split(DELIMITER);
+        List<String> parameters = new ArrayList<>(Arrays.asList(commandParts).subList(1, commandParts.length));
         return parameters;
     }
 }

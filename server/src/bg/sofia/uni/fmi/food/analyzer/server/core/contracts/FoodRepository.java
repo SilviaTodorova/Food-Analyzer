@@ -1,19 +1,17 @@
 package bg.sofia.uni.fmi.food.analyzer.server.core.contracts;
 
-import java.io.IOException;
-
 public interface FoodRepository {
-    String getFoodById(Long id) throws IOException;
+    String getFoodById(Long id) ;
 
-    String getFoodByName(String name) throws IOException;
+    String getFoodByName(String name);
 
-    String getFoodByBarcode(String code) throws IOException;
+    String getFoodByBarcode(String code);
 
-    void saveFoodReportById(long id, String text) throws IOException;
+    void saveFoodReportById(long id, String text);
 
-    void saveFoodReportByName(String name, String text) throws IOException;
+    void saveFoodReportByName(String name, String text);
 
-    void saveFoodReportByBarcode(String code, String text) throws IOException;
+    void saveFoodReportByBarcode(String code, String text);
 
     boolean checkFoodExistByName(String name);
 

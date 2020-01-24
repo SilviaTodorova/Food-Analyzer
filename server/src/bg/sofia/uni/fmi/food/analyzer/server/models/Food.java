@@ -4,13 +4,11 @@ public class Food {
     private final long fdcId;
     private final String description;
     private final String gtinUpc;
-    private final String ingredients;
 
-    public Food(long fdcId, String description, String gtinUpc, String ingredients) {
+    public Food(long fdcId, String description, String gtinUpc) {
         this.fdcId = fdcId;
         this.description = description;
         this.gtinUpc = gtinUpc;
-        this.ingredients = ingredients;
     }
 
     public long getFdcId() {
@@ -23,9 +21,5 @@ public class Food {
 
     public String getGtinUpc() {
         return gtinUpc;
-    }
-
-    public String getIngredients() {
-        return ingredients;
     }
 }

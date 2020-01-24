@@ -22,13 +22,14 @@ import java.util.Set;
 
 import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.*;
 
-import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClient;
+import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClientImpl;
+import bg.sofia.uni.fmi.food.analyzer.server.core.repositories.FoodRepositoryImpl;
 
 public class FoodAnalyzerServer {
     private final CommandFactory commandFactory;
     private final CommandParser commandParser;
     private final FoodRepository repository;
-    private final FoodClient clientFood;
+    private final FoodClientImpl clientFood;
 
     public FoodAnalyzerServer() {
         commandFactory = new CommandFactoryImpl();
@@ -36,15 +37,17 @@ public class FoodAnalyzerServer {
         repository = new FoodRepositoryImpl();
 
         HttpClient client = HttpClient.newHttpClient();
-        clientFood = new FoodClient(client, API_KEY);
+        clientFood = new FoodClientImpl(client, API_KEY);
     }
 
     public void test() {
         List<String> cmds = new ArrayList<>();
 
-       cmds.add("get-food beef noodle soup");
-       cmds.add("get-food-report 415269");
-       cmds.add("get-food-by-barcode --img=D:\\Photos\\BarcodeImage.jpg --code=009800146130");
+        cmds.add("get-food beef noodle soup");
+        cmds.add("get-food-report 415269");
+        cmds.add("get-food-report 570429");
+        // cmds.add("get-food-by-barcode --img=D:\\JavaProjects\\ModernJavaTechnology\\food-analyzer\\server\\resources\\chia.png");
+        cmds.add("get-food-by-barcode --img=D:\\Photos\\BarcodeImage.jpg --code=009800146130");
 
         for (String commandAsString : cmds) {
             String commandName = commandParser.parseCommand(commandAsString);
@@ -141,7 +144,7 @@ public class FoodAnalyzerServer {
         }
     }
 
-    private void processCommand(String commandAsString, SocketChannel sc, ByteBuffer buffer) throws IOException, InterruptedException {
+    private void processCommand(String commandAsString, SocketChannel sc, ByteBuffer buffer) throws IOException {
         if (commandAsString == null || commandAsString.trim().equals("")) {
             throw new IllegalArgumentException(COMMAND_CANNOT_BE_NULL_OR_EMPTY);
         }

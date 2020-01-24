@@ -1,11 +1,11 @@
 package bg.sofia.uni.fmi.food.analyzer.server.commands;
 
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
-import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClient;
+import bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants;
+import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClientImpl;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,27 +16,27 @@ public class GetFood implements Command {
     private static final String GET_FOOD_BY_NAME = "get-food";
 
     private final FoodRepository repository;
-    private final FoodClient client;
+    private final FoodClientImpl client;
 
     private String name;
 
-    public GetFood(FoodRepository repository, FoodClient client) {
+    public GetFood(FoodRepository repository, FoodClientImpl client) {
         this.repository = repository;
         this.client = client;
     }
 
     @Override
-    public String execute(List<String> parameters) throws IOException, InterruptedException {
+    public String execute(List<String> parameters) {
         validateInput(parameters);
 
         parseParameters(parameters);
 
-        StringBuilder builder = new StringBuilder()
-                .append("-------- Search Results for ")
-                .append(name)
-                .append(" --------")
-                .append(System.lineSeparator())
-                .append(System.lineSeparator());
+        StringBuilder builder = new StringBuilder();
+        builder.append("-------- Search Results for ")
+               .append(name)
+               .append(" --------")
+               .append(System.lineSeparator())
+               .append(System.lineSeparator());
 
         if (repository.checkFoodExistByName(name)) {
             return builder.append(repository.getFoodByName(name)).toString();
@@ -58,7 +58,7 @@ public class GetFood implements Command {
 
     private void parseParameters(List<String> parameters) {
         try {
-            name = String.join(DELIMITER, parameters);
+            name = String.join(GlobalConstants.DELIMITER, parameters);
         } catch (Exception e) {
             throw new IllegalArgumentException(
                     String.format(FAILED_PARSING_PARAMETERS_MESSAGE_FORMAT, GET_FOOD_BY_NAME));
@@ -72,9 +72,9 @@ public class GetFood implements Command {
 
         StringBuilder builder = new StringBuilder();
         for (Food food : foods) {
-            append(builder, FDC_ID_FIELD, String.valueOf(food.getFdcId()));
-            append(builder, GTIN_UPC_FIELD, String.valueOf(food.getGtinUpc()));
-            append(builder, DESCRIPTION_FIELD, String.valueOf(food.getDescription()));
+            append(builder, GlobalConstants.FDC_ID_FIELD, String.valueOf(food.getFdcId()));
+            append(builder, GlobalConstants.GTIN_UPC_FIELD, String.valueOf(food.getGtinUpc()));
+            append(builder, GlobalConstants.DESC_FIELD, String.valueOf(food.getDescription()));
             builder.append(System.lineSeparator());
         }
 
@@ -82,7 +82,7 @@ public class GetFood implements Command {
     }
 
     private void append(StringBuilder builder, String field, String value) {
-        if (!IS_NULL_OR_EMPTY_FIELD_PREDICATE.test(value)) {
+        if (!GlobalConstants.IS_NULL_OR_EMPTY_FIELD_PREDICATE.test(value)) {
             builder.append(field).append(": ").append(value).append(System.lineSeparator());
         }
     }
