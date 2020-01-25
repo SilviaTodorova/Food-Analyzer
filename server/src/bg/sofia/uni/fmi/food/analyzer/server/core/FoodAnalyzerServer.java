@@ -18,6 +18,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +28,9 @@ import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.*;
 
 import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClientImpl;
 import bg.sofia.uni.fmi.food.analyzer.server.core.repositories.FoodRepositoryImpl;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodBarcodeNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodIdNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodNotFoundException;
 
 public class FoodAnalyzerServer {
     private final CommandFactory commandFactory;
@@ -149,7 +153,7 @@ public class FoodAnalyzerServer {
         }
     }
 
-    private void processCommand(String commandAsString, SocketChannel sc, ByteBuffer buffer) throws IOException {
+    private void processCommand(String commandAsString, SocketChannel sc, ByteBuffer buffer) throws IOException, FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
         if (commandAsString == null || commandAsString.trim().equals("")) {
             throw new IllegalArgumentException(COMMAND_CANNOT_BE_NULL_OR_EMPTY);
         }
@@ -157,7 +161,7 @@ public class FoodAnalyzerServer {
         String commandName = commandParser.parseCommand(commandAsString);
         Command command = commandFactory.createCommand(commandName, repository, clientFood);
         List<String> parameters = commandParser.parseParameters(commandAsString);
-        String executionResult = command.execute(parameters);
+        String executionResult = command.execute(parameters) + System.lineSeparator();
 
         if (commandName.equals(DISCONNECT_COMMAND)) {
             sc.close();
@@ -168,5 +172,7 @@ public class FoodAnalyzerServer {
         buffer.put(executionResult.getBytes());
         buffer.flip();
         sc.write(buffer);
+
+        System.out.printf("[ %s ] %s", LocalDateTime.now().format(DATE_FORMATTER), commandAsString);
     }
 }

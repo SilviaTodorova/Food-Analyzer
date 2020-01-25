@@ -1,6 +1,9 @@
 package bg.sofia.uni.fmi.food.analyzer.server.core.clients;
 
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodBarcodeNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodIdNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 import bg.sofia.uni.fmi.food.analyzer.server.models.FoodReport;
 import org.junit.Before;

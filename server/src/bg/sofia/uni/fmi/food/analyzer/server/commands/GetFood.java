@@ -4,6 +4,7 @@ import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class GetFood implements Command {
     }
 
     @Override
-    public String execute(List<String> parameters) {
+    public String execute(List<String> parameters) throws FoodNotFoundException {
         validateInput(parameters);
 
         parseParameters(parameters);
@@ -45,7 +46,7 @@ public class GetFood implements Command {
         String response = formatExecutionResult(foods);
         repository.saveFoodByName(name, response);
 
-        return builder.append(response).toString();
+        return builder.append(response).append(System.lineSeparator()).toString();
     }
 
     private void validateInput(List<String> parameters) {

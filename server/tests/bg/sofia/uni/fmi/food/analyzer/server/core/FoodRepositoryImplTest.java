@@ -2,6 +2,9 @@ package bg.sofia.uni.fmi.food.analyzer.server.core;
 
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.core.repositories.FoodRepositoryImpl;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodBarcodeNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodIdNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodNotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -46,7 +49,7 @@ public class FoodRepositoryImplTest {
     }
 
     @Test
-    public void testSaveFoodReportByIdWithValidArguments() {
+    public void testSaveFoodReportByIdWithValidArguments() throws FoodIdNotFoundException {
         // Arrange
         repository.saveFoodReportById(EXISTING_ID, SOME_TEXT);
 
@@ -58,7 +61,7 @@ public class FoodRepositoryImplTest {
     }
 
     @Test
-    public void testSaveFoodByIdWithValidArguments() {
+    public void testSaveFoodByIdWithValidArguments() throws FoodNotFoundException {
         // Arrange
         repository.saveFoodByName(EXISTING_NAME, SOME_TEXT);
 
@@ -70,7 +73,7 @@ public class FoodRepositoryImplTest {
     }
 
     @Test
-    public void testSaveFoodByBarcodeWithValidArguments() {
+    public void testSaveFoodByBarcodeWithValidArguments() throws FoodBarcodeNotFoundException {
         // Arrange
         repository.saveFoodByBarcode(EXISTING_BARCODE, SOME_TEXT);
 
@@ -81,14 +84,14 @@ public class FoodRepositoryImplTest {
         Assert.assertEquals(SOME_TEXT, actual);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetFoodByNotExistingIdThrowsIllegalArgumentException() {
+    @Test(expected = FoodIdNotFoundException.class)
+    public void testGetFoodByNotExistingIdThrowsIllegalArgumentException() throws FoodIdNotFoundException {
         // Arrange, Act and Assert
         Assert.assertNotEquals(0, repository.getFoodById(NOT_EXISTING_ID).length());
     }
 
     @Test
-    public void testGetFoodByExistingId() throws IOException {
+    public void testGetFoodByExistingId() throws IOException, FoodIdNotFoundException {
         // Arrange
         Path path = Paths.get(pathFoodIdDir, String.valueOf(EXISTING_ID));
         File file = new File(path.toString());
@@ -98,14 +101,14 @@ public class FoodRepositoryImplTest {
         Assert.assertNotEquals(0, repository.getFoodById(EXISTING_ID).length());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetFoodByNotExistingNameThrowsIllegalArgumentException() {
+    @Test(expected = FoodNotFoundException.class)
+    public void testGetFoodByNotExistingNameThrowsIllegalArgumentException() throws FoodNotFoundException {
         // Arrange, Act and Assert
         Assert.assertNotEquals(0, repository.getFoodByName(NOT_EXISTING_NAME).length());
     }
 
     @Test
-    public void testGetFoodByExistingName() throws IOException {
+    public void testGetFoodByExistingName() throws IOException, FoodNotFoundException {
         // Arrange
         Path path = Paths.get(pathFoodNameDir, EXISTING_NAME);
         File file = new File(path.toString());
@@ -115,14 +118,14 @@ public class FoodRepositoryImplTest {
         Assert.assertNotEquals(0, repository.getFoodByName(EXISTING_NAME).length());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetFoodByNotExistingBarcodeThrowsIllegalArgumentException() {
+    @Test(expected = FoodBarcodeNotFoundException.class)
+    public void testGetFoodByNotExistingBarcodeThrowsIllegalArgumentException() throws FoodBarcodeNotFoundException {
         // Arrange, Act and Assert
         Assert.assertNotEquals(0, repository.getFoodByBarcode(NOT_EXISTING_BARCODE).length());
     }
 
     @Test
-    public void testGetFoodByExistingBarcode() throws IOException {
+    public void testGetFoodByExistingBarcode() throws IOException, FoodBarcodeNotFoundException {
         // Arrange
         Path path = Paths.get(pathFoodBarcodeDir, EXISTING_BARCODE);
         File file = new File(path.toString());

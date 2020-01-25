@@ -3,6 +3,9 @@ package bg.sofia.uni.fmi.food.analyzer.server.commands;
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodBarcodeNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodIdNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.models.FoodReport;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Nutrient;
 import org.junit.Assert;
@@ -40,19 +43,19 @@ public class GetFoodReportTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testExecuteCommandThrowsIllegalArgumentExceptionWithLessArguments() {
+    public void testExecuteCommandThrowsIllegalArgumentExceptionWithLessArguments() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
         // Arrange, Act & Assert
         testCommand.execute(asList());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testExecuteCommandThrowsIllegalArgumentExceptionWithMoreArguments() {
+    public void testExecuteCommandThrowsIllegalArgumentExceptionWithMoreArguments() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
         // Arrange, Act & Assert
         testCommand.execute(asList(new String[2]));
     }
 
     @Test
-    public void testExecuteCommandWithDataFromCache() {
+    public void testExecuteCommandWithDataFromCache() throws FoodIdNotFoundException, FoodNotFoundException, FoodBarcodeNotFoundException {
         // Arrange
         when(repositoryMock.checkFoodExistById(FDC_ID))
                 .thenReturn(true);
@@ -68,7 +71,7 @@ public class GetFoodReportTest {
     }
 
     @Test
-    public void testExecuteCommandWithDataFromApiNoResult() {
+    public void testExecuteCommandWithDataFromApiNoResult() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
         // Arrange
         when(repositoryMock.checkFoodExistById(FDC_ID))
                 .thenReturn(false);
@@ -84,7 +87,7 @@ public class GetFoodReportTest {
     }
 
     @Test
-    public void testExecuteCommandWithDataFromApi() {
+    public void testExecuteCommandWithDataFromApi() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
         // Arrange
         when(repositoryMock.checkFoodExistById(FDC_ID))
                 .thenReturn(false);

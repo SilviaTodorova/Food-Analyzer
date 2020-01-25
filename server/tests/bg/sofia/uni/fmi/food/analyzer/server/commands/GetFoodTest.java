@@ -1,9 +1,11 @@
 package bg.sofia.uni.fmi.food.analyzer.server.commands;
 
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
-import bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodBarcodeNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodIdNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 import org.junit.Assert;
 import org.junit.Before;
@@ -42,13 +44,13 @@ public class GetFoodTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testExecuteCommandThrowsIllegalArgumentExceptionWithLessArguments() {
+    public void testExecuteCommandThrowsIllegalArgumentExceptionWithLessArguments() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
         // Arrange, Act & Assert
         testCommand.execute(asList());
     }
 
     @Test
-    public void testExecuteCommandWithDataFromCache() {
+    public void testExecuteCommandWithDataFromCache() throws FoodNotFoundException, FoodIdNotFoundException, FoodBarcodeNotFoundException {
         // Arrange
         when(repositoryMock.checkFoodExistByName(NAME))
                 .thenReturn(true);
@@ -64,7 +66,7 @@ public class GetFoodTest {
     }
 
     @Test
-    public void testExecuteCommandWithDataFromApiNoResult() {
+    public void testExecuteCommandWithDataFromApiNoResult() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
         // Arrange
         when(repositoryMock.checkFoodExistByName(NAME))
                 .thenReturn(false);
@@ -74,11 +76,11 @@ public class GetFoodTest {
 
         // Act
         String result = testCommand.execute(asList(NAME));
-        Assert.assertEquals(formatResponse(NAME, NO_FOODS_WERE_FOUND_MESSAGE), result);
+        Assert.assertEquals(formatResponse(NAME, NO_FOODS_WERE_FOUND_MESSAGE + System.lineSeparator()), result);
     }
 
     @Test
-    public void testExecuteCommandWithDataFromApi() {
+    public void testExecuteCommandWithDataFromApi() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
         // Arrange
         when(repositoryMock.checkFoodExistByName(NAME))
                 .thenReturn(false);
@@ -94,7 +96,7 @@ public class GetFoodTest {
         append(builder, FDC_ID_FIELD, String.valueOf(FDC_ID));
         append(builder, GTIN_UPC_FIELD, GTIN_UPC);
         append(builder, DESC_FIELD, DESCRIPTION);
-        Assert.assertEquals(formatResponse(NAME, builder.toString().trim()), result);
+        Assert.assertEquals(formatResponse(NAME, builder.toString()), result);
     }
 
     private String formatResponse(String param, String response) {

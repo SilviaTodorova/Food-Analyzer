@@ -1,18 +1,20 @@
 package bg.sofia.uni.fmi.food.analyzer.server.common;
 
+import java.time.format.DateTimeFormatter;
 import java.util.function.Predicate;
 
 public class GlobalConstants {
     public static final String HOST = "localhost";
     public static final int PORT = 8080;
     public static final int SLEEP_MILLIS = 200;
-    public static final int BUFFER_SIZE = 1024;
+    public static final int BUFFER_SIZE = 131072;
     public static final String API_KEY = "XQhDTxbht58sQOKHtTmpwV2EE9GFtvPLaiI8vtVO";
 
     public static final String DISCONNECT_COMMAND = "disconnect";
 
     public static final String SERVER_RUNNING_MESSAGE_FORMAT = "server is running on %s:%d%n";
     public static final String ERROR_READ_CHANNEL_MESSAGE_FORMAT = "error while reading from channel%n";
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public static final Predicate<String> IS_NULL_OR_EMPTY_FIELD_PREDICATE = field -> field.equals("null") || field.isEmpty();
 

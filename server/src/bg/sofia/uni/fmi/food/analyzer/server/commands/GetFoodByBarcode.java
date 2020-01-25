@@ -4,6 +4,7 @@ import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodBarcodeNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import static bg.sofia.uni.fmi.food.analyzer.server.core.BarcodeConverter.decode
 public class GetFoodByBarcode implements Command {
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS_ONE_CRITERIA = 1;
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS_TWO_CRITERIAS = 2;
+    private static final String INVALID_PARAMETERS = "Invalid parameters";
 
     private static final String CODE_FLAG = "--code=";
     private static final String IMG_FLAG = "--img=";
@@ -31,7 +33,7 @@ public class GetFoodByBarcode implements Command {
     }
 
     @Override
-    public String execute(List<String> parameters) {
+    public String execute(List<String> parameters) throws FoodBarcodeNotFoundException {
         validateInput(parameters);
 
         parseParameters(parameters);
@@ -74,8 +76,7 @@ public class GetFoodByBarcode implements Command {
             boolean containsImgFlags = parameters.stream().anyMatch(x -> x.contains(IMG_FLAG));
 
             if(!containsCodeFlags && !containsImgFlags){
-                throw new IllegalArgumentException(
-                        String.format("TODO: %s", GET_FOOD_BY_BARCODE_COMMAND));
+                throw new IllegalArgumentException(INVALID_PARAMETERS);
             }
 
             if (containsCodeFlags) {

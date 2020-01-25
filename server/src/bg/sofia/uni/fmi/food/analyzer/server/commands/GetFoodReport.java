@@ -5,6 +5,7 @@ import bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants;
 import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClientImpl;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodIdNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.models.FoodReport;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Nutrient;
 
@@ -26,7 +27,7 @@ public class GetFoodReport implements Command {
     }
 
     @Override
-    public String execute(List<String> parameters) {
+    public String execute(List<String> parameters) throws FoodIdNotFoundException {
         validateInput(parameters);
 
         parseParameters(parameters);
