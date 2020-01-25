@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.food.analyzer.server.core.clients;
 
+import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 import bg.sofia.uni.fmi.food.analyzer.server.models.FoodReport;
 import org.junit.Before;
@@ -21,13 +22,34 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FoodClientTest {
+    private static final int FDC_ID_BEEF = 338105;
+    private static final int FDC_ID_RAFFAELLO = 415269;
+    private static final String NAME = "beef noodle soup";
+    private static final String BARCODE = "009800146130";
+
+    private static final String FOOD_REPORT_VALID_JSON = "{\"description\":\"RAFFAELLO\",\"labelNutrients\":" +
+            "{\"fat\":{\"value\":15.00},\"carbohydrates\":{\"value\":12.00},\"fiber\":{\"value\":0.99}," +
+            "\"protein\":{\"value\":2.00},\"calories\":{\"value\":189.90}},\"fdcId\":415269, " +
+            "\"ingredients\":\"ENRICHED WHEAT FLOUR\"}";
+
+    private static final String FOOD_REPORT_INVALID_JSON = "{\"description\":\"RAFFAELLO\",\"labelNutrients\":" +
+            "{\"fats\":{\"value\":15.00},\"carbohydrates\":{\"value\":12.00},\"fiber\":{\"value\":0.99}," +
+            "\"protein\":{\"value\":2.00},\"calories\":{\"value\":189.90}},\"fdcId\":415269, " +
+            "\"ingredients\":\"ENRICHED WHEAT FLOUR\"}";
+
+    private static final String FOODS_VALID_JSON = "{\"foods\":[{\"fdcId\":338105,\"description\":" +
+            "\"Beef and noodles\",\"gtinUpc\":\"009800146130\"}]}";
+
+    private static final String FOODS_INVALID_JSON = "{\"food\":[{\"fdcId\":338105,\"description\":" +
+            "\"Beef and noodles\",\"gtinUpc\":\"009800146130\"}]}";
+
     @Mock
     private HttpClient httpClientMock;
 
     @Mock
     private HttpResponse<String> httpResponseMock;
 
-    private FoodClientImpl client;
+    private FoodClient client;
 
     @Before
     public void setUp() {
@@ -35,85 +57,85 @@ public class FoodClientTest {
     }
 
     @Test
-    public void getFoodByBarcodeShouldReturnFoods() throws Exception {
+    public void testGetFoodByBarcodeWithValidJSON() throws Exception {
+        // Arrange
         when(httpClientMock.send(Mockito.any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<String>>any()))
                 .thenReturn(httpResponseMock);
 
-        String json = "{\"foods\":[{\"fdcId\":415269,\"description\":\"RAFFAELLO, ALMOND COCONUT TREAT\",\"gtinUpc\":\"009800146130\"}]}";
+        when(httpResponseMock.body()).thenReturn(FOODS_VALID_JSON);
 
-        when(httpResponseMock.body()).thenReturn(json);
+        // Act
+        List<Food> actual = new ArrayList<>(client.getFoodByBarcode(BARCODE));
 
         // Assert
-        List<Food> actual = new ArrayList<>(client.getFoodByBarcode("009800146130"));
         assertEquals(1, actual.size());
-        assertEquals(415269, actual.get(0).getFdcId());
+        assertEquals(FDC_ID_BEEF, actual.get(0).getFdcId());
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void testGetFoodByBarcodeShouldThrowExceptionWhenJsonIsInvalid() throws Exception {
+    public void testGetFoodByBarcodeThrowsExceptionWithInvalidJSON() throws Exception {
+        // Arrange
         when(httpClientMock.send(Mockito.any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<String>>any()))
                 .thenReturn(httpResponseMock);
 
-        String json = "{\"food\":[{\"fdcId\":415269,\"description\":\"RAFFAELLO, ALMOND COCONUT TREAT\",\"gtinUpc\":\"009800146130\"}]}";
+        when(httpResponseMock.body()).thenReturn(FOODS_INVALID_JSON);
 
-        when(httpResponseMock.body()).thenReturn(json);
-
-        // Assert
-        List<Food> actual = new ArrayList<>(client.getFoodByBarcode("009800146130"));
+        // Act and Assert
+        List<Food> actual = new ArrayList<>(client.getFoodByBarcode(BARCODE));
     }
 
     @Test
-    public void testGetFoodByNameShouldReturnFoods() throws Exception {
+    public void testGetFoodByNameWithValidJSON() throws Exception {
+        // Arrange
         when(httpClientMock.send(Mockito.any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<String>>any()))
                 .thenReturn(httpResponseMock);
 
-        String json = "{\"foods\":[{\"fdcId\":338105,\"description\":\"Beef and noodles with (mushroom) soup (mixture)\"}]}";
+        when(httpResponseMock.body()).thenReturn(FOODS_VALID_JSON);
 
-        when(httpResponseMock.body()).thenReturn(json);
+        // Act
+        List<Food> actual = new ArrayList<>(client.getFoodByName(NAME));
 
         // Assert
-        List<Food> actual = new ArrayList<>(client.getFoodByName("009800146130"));
         assertEquals(1, actual.size());
-        assertEquals(338105, actual.get(0).getFdcId());
+        assertEquals(FDC_ID_BEEF, actual.get(0).getFdcId());
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void testGetFoodByNameShouldThrowExceptionWhenJsonIsInvalid() throws Exception {
+    public void testGetFoodByNameThrowsExceptionWithInvalidJSON() throws Exception {
+        // Arrange
         when(httpClientMock.send(Mockito.any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<String>>any()))
                 .thenReturn(httpResponseMock);
 
-        String json = "{\"food\":[{\"fdcId\":338105,\"description\":\"Beef and noodles with (mushroom) soup (mixture)\"}]}";
+        when(httpResponseMock.body()).thenReturn(FOODS_INVALID_JSON);
 
-        when(httpResponseMock.body()).thenReturn(json);
-
-        // Assert
-        List<Food> actual = new ArrayList<>(client.getFoodByName("009800146130"));
+        // Act and Assert
+        List<Food> actual = new ArrayList<>(client.getFoodByName(NAME));
     }
 
     @Test
-    public void testGetFoodByIdShouldReturnFoods() throws Exception {
+    public void testGetFoodByIdWithValidJSON() throws Exception {
+        // Arrange
         when(httpClientMock.send(Mockito.any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<String>>any()))
                 .thenReturn(httpResponseMock);
 
-        String json = "{\"description\":\"RAFFAELLO, ALMOND COCONUT TREAT\",\"labelNutrients\":{\"fat\":{\"value\":15.0000000000000000},\"carbohydrates\":{\"value\":12.0000000000000000},\"fiber\":{\"value\":0.9900000000000000},\"protein\":{\"value\":2.0010000000000000},\"calories\":{\"value\":189.9000000000000000}},\"fdcId\":415269, \"ingredients\":\"ENRICHED WHEAT FLOUR\"}";
+        when(httpResponseMock.body()).thenReturn(FOOD_REPORT_VALID_JSON);
 
-        when(httpResponseMock.body()).thenReturn(json);
+        // Act
+        FoodReport actual = client.getFoodReportById(FDC_ID_RAFFAELLO);
 
         // Assert
-        FoodReport actual = client.getFoodReportById(415269);
-        assertEquals(actual.getFdcId(), 415269);
+        assertEquals(actual.getFdcId(), FDC_ID_RAFFAELLO);
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void testGetFoodByIdShouldThrowExceptionWhenJsonIsInvalid() throws Exception {
+    public void testGetFoodByIdThrowsExceptionWithInvalidJSON() throws Exception {
+        // Arrange
         when(httpClientMock.send(Mockito.any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<String>>any()))
                 .thenReturn(httpResponseMock);
 
-        String json = "{\"description\":\"RAFFAELLO, ALMOND COCONUT TREAT\",\"labelNutrients\":{\"carbohydrates\":{\"value\":12.0000000000000000},\"fiber\":{\"value\":0.9900000000000000},\"protein\":{\"value\":2.0010000000000000},\"calories\":{\"value\":189.9000000000000000}},\"fdcId\":415269}";
+        when(httpResponseMock.body()).thenReturn(FOOD_REPORT_INVALID_JSON);
 
-        when(httpResponseMock.body()).thenReturn(json);
-
-        // Assert
-        FoodReport actual = client.getFoodReportById(415269);
+        // Act and Assert
+        FoodReport actual = client.getFoodReportById(FDC_ID_BEEF);
     }
 }

@@ -2,7 +2,7 @@ package bg.sofia.uni.fmi.food.analyzer.server.commands;
 
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants;
-import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClientImpl;
+import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 
@@ -16,17 +16,16 @@ import static bg.sofia.uni.fmi.food.analyzer.server.core.BarcodeConverter.decode
 public class GetFoodByBarcode implements Command {
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS_ONE_CRITERIA = 1;
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS_TWO_CRITERIAS = 2;
-    private static final String GET_FOOD_REPORT = "get-food-report";
 
     private static final String CODE_FLAG = "--code=";
     private static final String IMG_FLAG = "--img=";
 
     private final FoodRepository repository;
-    private final FoodClientImpl client;
+    private final FoodClient client;
 
     private String barcode;
 
-    public GetFoodByBarcode(FoodRepository repository, FoodClientImpl client) {
+    public GetFoodByBarcode(FoodRepository repository, FoodClient client) {
         this.repository = repository;
         this.client = client;
     }
@@ -50,7 +49,7 @@ public class GetFoodByBarcode implements Command {
 
         List<Food> foods = new ArrayList<>(client.getFoodByBarcode(barcode));
         String response = formatExecutionResult(foods);
-        repository.saveFoodReportByBarcode(barcode, response);
+        repository.saveFoodByBarcode(barcode, response);
         return builder.append(response).toString();
     }
 
@@ -76,7 +75,7 @@ public class GetFoodByBarcode implements Command {
 
             if(!containsCodeFlags && !containsImgFlags){
                 throw new IllegalArgumentException(
-                        String.format("TODO: %s", GET_FOOD_REPORT));
+                        String.format("TODO: %s", GET_FOOD_BY_BARCODE_COMMAND));
             }
 
             if (containsCodeFlags) {
@@ -100,7 +99,7 @@ public class GetFoodByBarcode implements Command {
             barcode = decodeBarcodeImage(img);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    String.format(FAILED_PARSING_PARAMETERS_MESSAGE_FORMAT, GET_FOOD_REPORT));
+                    String.format(FAILED_PARSING_PARAMETERS_MESSAGE_FORMAT, GET_FOOD_BY_BARCODE_COMMAND));
         }
     }
 

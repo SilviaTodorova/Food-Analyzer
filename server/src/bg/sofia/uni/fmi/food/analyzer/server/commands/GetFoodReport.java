@@ -3,6 +3,7 @@ package bg.sofia.uni.fmi.food.analyzer.server.commands;
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants;
 import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClientImpl;
+import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.models.FoodReport;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Nutrient;
@@ -13,14 +14,13 @@ import static bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConst
 
 public class GetFoodReport implements Command {
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS = 1;
-    private static final String GET_FOOD_REPORT = "get-food-report";
 
     private final FoodRepository repository;
-    private final FoodClientImpl client;
+    private final FoodClient client;
 
-    private Long id;
+    private long id;
 
-    public GetFoodReport(FoodRepository repository, FoodClientImpl client) {
+    public GetFoodReport(FoodRepository repository, FoodClient client) {
         this.repository = repository;
         this.client = client;
     }
@@ -61,7 +61,7 @@ public class GetFoodReport implements Command {
             id = Long.parseLong(parameters.get(0));
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    String.format(FAILED_PARSING_PARAMETERS_MESSAGE_FORMAT, GET_FOOD_REPORT));
+                    String.format(FAILED_PARSING_PARAMETERS_MESSAGE_FORMAT, GET_FOOD_REPORT_COMMAND));
         }
     }
 

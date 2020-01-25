@@ -2,7 +2,7 @@ package bg.sofia.uni.fmi.food.analyzer.server.commands;
 
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants;
-import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClientImpl;
+import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 
@@ -13,14 +13,13 @@ import static bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConst
 
 public class GetFood implements Command {
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS = 1;
-    private static final String GET_FOOD_BY_NAME = "get-food";
 
     private final FoodRepository repository;
-    private final FoodClientImpl client;
+    private final FoodClient client;
 
     private String name;
 
-    public GetFood(FoodRepository repository, FoodClientImpl client) {
+    public GetFood(FoodRepository repository, FoodClient client) {
         this.repository = repository;
         this.client = client;
     }
@@ -44,7 +43,7 @@ public class GetFood implements Command {
 
         List<Food> foods = new ArrayList<>(client.getFoodByName(name));
         String response = formatExecutionResult(foods);
-        repository.saveFoodReportByName(name, response);
+        repository.saveFoodByName(name, response);
 
         return builder.append(response).toString();
     }
@@ -61,7 +60,7 @@ public class GetFood implements Command {
             name = String.join(GlobalConstants.DELIMITER, parameters);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    String.format(FAILED_PARSING_PARAMETERS_MESSAGE_FORMAT, GET_FOOD_BY_NAME));
+                    String.format(FAILED_PARSING_PARAMETERS_MESSAGE_FORMAT, GET_FOOD_COMMAND));
         }
     }
 

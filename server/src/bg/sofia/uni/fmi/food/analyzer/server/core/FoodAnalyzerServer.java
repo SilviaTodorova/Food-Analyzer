@@ -3,6 +3,7 @@ package bg.sofia.uni.fmi.food.analyzer.server.core;
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.CommandFactory;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.CommandParser;
+import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.core.factories.CommandFactoryImpl;
 import bg.sofia.uni.fmi.food.analyzer.server.core.providers.CommandParserImpl;
@@ -15,6 +16,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,12 +32,14 @@ public class FoodAnalyzerServer {
     private final CommandFactory commandFactory;
     private final CommandParser commandParser;
     private final FoodRepository repository;
-    private final FoodClientImpl clientFood;
+    private final FoodClient clientFood;
+
+    private static final Path PATH = FileSystems.getDefault().getPath(REPOSITORY_DIR).toAbsolutePath();
 
     public FoodAnalyzerServer() {
         commandFactory = new CommandFactoryImpl();
         commandParser = new CommandParserImpl();
-        repository = new FoodRepositoryImpl();
+        repository = new FoodRepositoryImpl(PATH);
 
         HttpClient client = HttpClient.newHttpClient();
         clientFood = new FoodClientImpl(client, API_KEY);

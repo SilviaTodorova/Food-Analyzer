@@ -21,10 +21,12 @@ public class GlobalConstants {
     public static final String NO_A_SUCH_FILE = "There is no a such file";
     public static final String NO_BARCODE_IN_THE_IMAGE = "There is no barcode in the image";
 
-    public static final String PATH_FOOD_NAME_DIR = "D:\\JavaProjects\\ModernJavaTechnology\\food-analyzer\\server\\database\\food-name\\%s";
-    public static final String PATH_FOOD_ID_DIR = "D:\\JavaProjects\\ModernJavaTechnology\\food-analyzer\\server\\database\\food-id\\%s";
-    public static final String PATH_FOOD_BARCODE = "D:\\JavaProjects\\ModernJavaTechnology\\food-analyzer\\server\\database\\food-barcode\\%s";
-
+    public static final String RESOURCES_DIR = "resources";
+    public static final String REPOSITORY_DIR = "repository";
+    public static final String REPOSITORY_TESTS_DIR = "repository-tests";
+    public static final String FOOD_NAME_DIR = "food-name";
+    public static final String FOOD_ID_DIR = "food-id";
+    public static final String FOOD_BARCODE_DIR = "food-barcode";
 
     public static final String DELIMITER = " ";
     public static final String EMPTY_STRING = "";
@@ -40,5 +42,7 @@ public class GlobalConstants {
     public static final String GTIN_UPC_FIELD = "gtinUpc";
     public static final String DESC_FIELD = "description";
     public static final String INGREDIENTS_FIELD = "ingredients";
+    public static final String SRC_DIR = "src";
+    public static final String TESTS_DIR = "tests";
 }
 

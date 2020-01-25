@@ -4,5 +4,5 @@ import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClientImpl;
 
 public interface CommandFactory {
-    Command createCommand(String commandTypeAsString, FoodRepository repository, FoodClientImpl client);
+    Command createCommand(String commandTypeAsString, FoodRepository repository, FoodClient client);
 }

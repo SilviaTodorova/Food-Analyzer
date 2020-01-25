@@ -1,9 +1,9 @@
 package bg.sofia.uni.fmi.food.analyzer.server.models;
 
 public class Food {
-    private final long fdcId;
-    private final String description;
-    private final String gtinUpc;
+    private long fdcId;
+    private String description;
+    private String gtinUpc;
 
     public Food(long fdcId, String description, String gtinUpc) {
         this.fdcId = fdcId;
