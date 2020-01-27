@@ -20,6 +20,18 @@ import java.nio.file.Paths;
 import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.*;
 
 public class FoodRepositoryImplTest {
+    private static final String SAVE_FOOD_REPORT_BY_ID = "Save food report by id";
+    private static final String SAVE_FOODS_BY_NAME = "Save foods by name";
+    private static final String SAVE_FOODS_BY_BARCODE = "Save foods by barcode";
+
+    private static final String GET_FOOD_REPORT_BY_ID = "Get food report by id";
+    private static final String GET_FOODS_BY_NAME = "Get foods by name";
+    private static final String GET_FOODS_BY_BARCODE = "Get foods by barcode";
+
+    private static final String CHECK_FOOD_REPORT_EXIST_BY_ID = "Check food report exist by id";
+    private static final String CHECK_FOODS_EXIST_BY_NAME = "Check foods exist by name";
+    private static final String CHECK_FOODS_EXIST_BY_BARCODE = "Check foods exist by barcode";
+
     private static final long EXISTING_ID = 415269;
     private static final long NOT_EXISTING_ID = 555555;
     private static final String EXISTING_BARCODE = "009800146130";
@@ -28,7 +40,9 @@ public class FoodRepositoryImplTest {
     private static final String NOT_EXISTING_NAME = "beef";
     private static final String SOME_TEXT = "some text";
 
-    private static final Path PATH_HOME_DIR = FileSystems.getDefault().getPath(REPOSITORY_TESTS_DIR).toAbsolutePath();
+    private static final Path PATH_HOME_DIR = FileSystems.getDefault()
+            .getPath(REPOSITORY_TESTS_DIR)
+            .toAbsolutePath();
 
     private static String pathFoodNameDir;
     private static String pathFoodIdDir;
@@ -57,11 +71,11 @@ public class FoodRepositoryImplTest {
         String actual = repository.getFoodById(EXISTING_ID);
 
         // Assert
-        Assert.assertEquals(SOME_TEXT, actual);
+        Assert.assertEquals(SAVE_FOOD_REPORT_BY_ID, SOME_TEXT, actual);
     }
 
     @Test
-    public void testSaveFoodByIdWithValidArguments() throws FoodNotFoundException {
+    public void testSaveFoodByNameWithValidArguments() throws FoodNotFoundException {
         // Arrange
         repository.saveFoodByName(EXISTING_NAME, SOME_TEXT);
 
@@ -69,7 +83,7 @@ public class FoodRepositoryImplTest {
         String actual = repository.getFoodByName(EXISTING_NAME);
 
         // Assert
-        Assert.assertEquals(SOME_TEXT, actual);
+        Assert.assertEquals(SAVE_FOODS_BY_NAME, SOME_TEXT, actual);
     }
 
     @Test
@@ -81,13 +95,15 @@ public class FoodRepositoryImplTest {
         String actual = repository.getFoodByBarcode(EXISTING_BARCODE);
 
         // Assert
-        Assert.assertEquals(SOME_TEXT, actual);
+        Assert.assertEquals(SAVE_FOODS_BY_BARCODE, SOME_TEXT, actual);
     }
 
     @Test(expected = FoodIdNotFoundException.class)
     public void testGetFoodByNotExistingIdThrowsIllegalArgumentException() throws FoodIdNotFoundException {
         // Arrange, Act and Assert
-        Assert.assertNotEquals(0, repository.getFoodById(NOT_EXISTING_ID).length());
+        Assert.assertNotEquals(GET_FOOD_REPORT_BY_ID,
+                0,
+                repository.getFoodById(NOT_EXISTING_ID).length());
     }
 
     @Test
@@ -98,13 +114,17 @@ public class FoodRepositoryImplTest {
         writeInFile(file, SOME_TEXT);
 
         // Act and Assert
-        Assert.assertNotEquals(0, repository.getFoodById(EXISTING_ID).length());
+        Assert.assertNotEquals(GET_FOOD_REPORT_BY_ID,
+                0,
+                repository.getFoodById(EXISTING_ID).length());
     }
 
     @Test(expected = FoodNotFoundException.class)
     public void testGetFoodByNotExistingNameThrowsIllegalArgumentException() throws FoodNotFoundException {
         // Arrange, Act and Assert
-        Assert.assertNotEquals(0, repository.getFoodByName(NOT_EXISTING_NAME).length());
+        Assert.assertNotEquals(GET_FOODS_BY_NAME,
+                0,
+                repository.getFoodByName(NOT_EXISTING_NAME).length());
     }
 
     @Test
@@ -115,13 +135,17 @@ public class FoodRepositoryImplTest {
         writeInFile(file, SOME_TEXT);
 
         // Act and Assert
-        Assert.assertNotEquals(0, repository.getFoodByName(EXISTING_NAME).length());
+        Assert.assertNotEquals(GET_FOODS_BY_NAME,
+                0,
+                repository.getFoodByName(EXISTING_NAME).length());
     }
 
     @Test(expected = FoodBarcodeNotFoundException.class)
     public void testGetFoodByNotExistingBarcodeThrowsIllegalArgumentException() throws FoodBarcodeNotFoundException {
         // Arrange, Act and Assert
-        Assert.assertNotEquals(0, repository.getFoodByBarcode(NOT_EXISTING_BARCODE).length());
+        Assert.assertNotEquals(GET_FOODS_BY_BARCODE,
+                0,
+                repository.getFoodByBarcode(NOT_EXISTING_BARCODE).length());
     }
 
     @Test
@@ -132,7 +156,9 @@ public class FoodRepositoryImplTest {
         writeInFile(file, SOME_TEXT);
 
         // Act and Assert
-        Assert.assertNotEquals(0, repository.getFoodByBarcode(EXISTING_BARCODE).length());
+        Assert.assertNotEquals(GET_FOODS_BY_BARCODE,
+                0,
+                repository.getFoodByBarcode(EXISTING_BARCODE).length());
     }
 
     @Test
@@ -143,13 +169,15 @@ public class FoodRepositoryImplTest {
         file.createNewFile();
 
         // Act and Assert
-        Assert.assertTrue(repository.checkFoodExistByBarcode(EXISTING_BARCODE));
+        Assert.assertTrue(CHECK_FOODS_EXIST_BY_BARCODE,
+                repository.checkFoodExistByBarcode(EXISTING_BARCODE));
     }
 
     @Test
     public void testCheckFoodExistByNotExistingBarcode() {
         // Arrange, Act and Assert
-        Assert.assertFalse(repository.checkFoodExistByBarcode(NOT_EXISTING_BARCODE));
+        Assert.assertFalse(CHECK_FOODS_EXIST_BY_BARCODE,
+                repository.checkFoodExistByBarcode(NOT_EXISTING_BARCODE));
     }
 
     @Test
@@ -160,13 +188,15 @@ public class FoodRepositoryImplTest {
         file.createNewFile();
 
         // Act and Assert
-        Assert.assertTrue(repository.checkFoodExistById(Long.parseLong(String.valueOf(EXISTING_ID))));
+        Assert.assertTrue(CHECK_FOOD_REPORT_EXIST_BY_ID,
+                repository.checkFoodExistById(Long.parseLong(String.valueOf(EXISTING_ID))));
     }
 
     @Test
     public void testCheckFoodExistByNotExistingId() {
         // Arrange, Act and Assert
-        Assert.assertFalse(repository.checkFoodExistById(NOT_EXISTING_ID));
+        Assert.assertFalse(CHECK_FOOD_REPORT_EXIST_BY_ID,
+                repository.checkFoodExistById(NOT_EXISTING_ID));
     }
 
     @Test
@@ -177,13 +207,15 @@ public class FoodRepositoryImplTest {
         file.createNewFile();
 
         // Act and Assert
-        Assert.assertTrue(repository.checkFoodExistByName(EXISTING_NAME));
+        Assert.assertTrue(CHECK_FOODS_EXIST_BY_NAME,
+                repository.checkFoodExistByName(EXISTING_NAME));
     }
 
     @Test
     public void testCheckFoodExistByNotExistingName() {
         // Arrange, Act and Assert
-        Assert.assertFalse(repository.checkFoodExistByName(NOT_EXISTING_NAME));
+        Assert.assertFalse(CHECK_FOODS_EXIST_BY_NAME,
+                repository.checkFoodExistByName(NOT_EXISTING_NAME));
     }
 
     private void writeInFile(File file, String text) throws IOException {

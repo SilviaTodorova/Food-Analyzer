@@ -1,20 +1,22 @@
 package bg.sofia.uni.fmi.food.analyzer.server.commands;
 
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
-import bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodClient;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodBarcodeNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.ImageNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants.*;
+import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.*;
 import static bg.sofia.uni.fmi.food.analyzer.server.core.BarcodeConverter.decodeBarcodeImage;
 
 public class GetFoodByBarcode implements Command {
+    private static final String INVALID_NUMBER_OF_ARGUMENTS_ONE_OR_TWO_MESSAGE_FORMAT =
+            "Invalid number of arguments. Expected: %d or %d, Received: %d";
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS_ONE_CRITERIA = 1;
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS_TWO_CRITERIAS = 2;
     private static final String INVALID_PARAMETERS = "Invalid parameters";
@@ -33,94 +35,73 @@ public class GetFoodByBarcode implements Command {
     }
 
     @Override
-    public String execute(List<String> parameters) throws FoodBarcodeNotFoundException {
+    public String execute(List<String> parameters)
+            throws FoodBarcodeNotFoundException,
+            ImageNotFoundException {
         validateInput(parameters);
 
         parseParameters(parameters);
 
-        StringBuilder builder = new StringBuilder();
-        builder.append("-------- Search Results for barcode: ")
-               .append(barcode)
-               .append(" --------")
-               .append(System.lineSeparator())
-               .append(System.lineSeparator());
-
         if (repository.checkFoodExistByBarcode(barcode)) {
-            return builder.append(repository.getFoodByBarcode(barcode)).toString();
+            return repository.getFoodByBarcode(barcode);
         }
 
         List<Food> foods = new ArrayList<>(client.getFoodByBarcode(barcode));
-        String response = formatExecutionResult(foods);
+
+        if (foods.size() == 0) {
+            throw new FoodBarcodeNotFoundException(NO_FOODS_WERE_FOUND_MESSAGE);
+        }
+
+        StringBuilder builder = new StringBuilder();
+        foods.stream().forEach(builder::append);
+        String response = builder.toString().trim();
+
         repository.saveFoodByBarcode(barcode, response);
-        return builder.append(response).toString();
+        return response;
     }
 
     private void validateInput(List<String> parameters) {
         int size = parameters.size();
-        boolean containsFlags = parameters
-                .stream()
-                .filter(Objects::nonNull)
-                .anyMatch(x -> x.contains(CODE_FLAG) || x.contains(IMG_FLAG));
 
         if (size != EXPECTED_NUMBER_OF_ARGUMENTS_ONE_CRITERIA
-                && size != EXPECTED_NUMBER_OF_ARGUMENTS_TWO_CRITERIAS
-                && !containsFlags) {
+                && size != EXPECTED_NUMBER_OF_ARGUMENTS_TWO_CRITERIAS) {
+
             throw new IllegalArgumentException(
-                    String.format(INVALID_NUMBER_OF_ARGUMENTS_MESSAGE_FORMAT, EXPECTED_NUMBER_OF_ARGUMENTS_ONE_CRITERIA, parameters.size()));
+                    String.format(
+                            INVALID_NUMBER_OF_ARGUMENTS_ONE_OR_TWO_MESSAGE_FORMAT,
+                            EXPECTED_NUMBER_OF_ARGUMENTS_ONE_CRITERIA,
+                            EXPECTED_NUMBER_OF_ARGUMENTS_TWO_CRITERIAS,
+                            parameters.size()));
         }
     }
 
-    private void parseParameters(List<String> parameters) {
-        try {
-            boolean containsCodeFlags = parameters.stream().anyMatch(x -> x.contains(CODE_FLAG));
-            boolean containsImgFlags = parameters.stream().anyMatch(x -> x.contains(IMG_FLAG));
+    private void parseParameters(List<String> parameters) throws ImageNotFoundException {
+        boolean containsCodeFlags = parameters.stream().anyMatch(param -> param.contains(CODE_FLAG));
+        boolean containsImgFlags = parameters.stream().anyMatch(param -> param.contains(IMG_FLAG));
 
-            if(!containsCodeFlags && !containsImgFlags){
-                throw new IllegalArgumentException(INVALID_PARAMETERS);
-            }
+        if (!containsCodeFlags && !containsImgFlags) {
+            throw new IllegalArgumentException(INVALID_PARAMETERS);
+        }
 
-            if (containsCodeFlags) {
-                barcode = parameters
-                        .stream()
-                        .filter(x -> x.contains(CODE_FLAG))
-                        .map(param -> param.replaceAll(CODE_FLAG, GlobalConstants.EMPTY_STRING))
-                        .findFirst()
-                        .get();
-
-                return;
-            }
-
-            String img = parameters
+        if (containsCodeFlags) {
+            barcode = parameters
                     .stream()
-                    .filter(x -> x.contains(IMG_FLAG))
-                    .map(x -> x.replaceAll(IMG_FLAG, GlobalConstants.EMPTY_STRING))
+                    .filter(param -> param.contains(CODE_FLAG))
+                    .map(param -> param.replaceAll(CODE_FLAG, EMPTY_STRING))
+                    .filter(param -> !param.equals(EMPTY_STRING))
                     .findFirst()
-                    .get();
+                    .orElseThrow(() -> new IllegalArgumentException(INVALID_PARAMETERS));
 
-            barcode = decodeBarcodeImage(img);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    String.format(FAILED_PARSING_PARAMETERS_MESSAGE_FORMAT, GET_FOOD_BY_BARCODE_COMMAND));
-        }
-    }
-
-    private String formatExecutionResult(List<Food> foods) {
-        if (foods.size() == 0) {
-            return NO_FOODS_WERE_FOUND_MESSAGE;
+            return;
         }
 
-        StringBuilder builder = new StringBuilder();
-        for (Food food : foods) {
-            append(builder, GlobalConstants.FDC_ID_FIELD, String.valueOf(food.getFdcId()));
-            append(builder, GlobalConstants.GTIN_UPC_FIELD, String.valueOf(food.getGtinUpc()));
-            append(builder, GlobalConstants.DESC_FIELD, String.valueOf(food.getDescription()));
-        }
-        return builder.toString();
-    }
+        String img = parameters
+                .stream()
+                .filter(param -> param.contains(IMG_FLAG))
+                .map(param -> param.replaceAll(IMG_FLAG, EMPTY_STRING))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(INVALID_PARAMETERS));
 
-    private void append(StringBuilder builder, String field, String value) {
-        if (!GlobalConstants.IS_NULL_OR_EMPTY_FIELD_PREDICATE.test(value)) {
-            builder.append(field).append(": ").append(value).append(System.lineSeparator());
-        }
+        barcode = decodeBarcodeImage(img);
     }
 }

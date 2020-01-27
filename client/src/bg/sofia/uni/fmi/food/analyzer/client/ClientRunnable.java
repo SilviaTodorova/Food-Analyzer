@@ -27,7 +27,7 @@ public class ClientRunnable implements Runnable {
                 System.out.print(reply);
             }
         } catch (IOException e) {
-            System.out.printf(ERROR_READ_DATA_FROM_SERVER_MESSAGE_FORMAT);
+            System.out.println(ERROR_READ_DATA_FROM_SERVER_MESSAGE_FORMAT);
         }
     }
 }

@@ -6,6 +6,5 @@ public class Startup {
     public static void main(String[] args) {
         FoodAnalyzerServer server = new FoodAnalyzerServer();
         server.start();
-        // server.test();
     }
 }

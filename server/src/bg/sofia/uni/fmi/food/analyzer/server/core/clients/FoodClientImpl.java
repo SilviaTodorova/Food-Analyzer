@@ -5,10 +5,7 @@ import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodBarcodeNotFoundExcep
 import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodIdNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
-import bg.sofia.uni.fmi.food.analyzer.server.models.FoodReport;
-import bg.sofia.uni.fmi.food.analyzer.server.models.Nutrient;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
@@ -20,14 +17,17 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
 
+import static bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants.NO_FOODS_WERE_FOUND_MESSAGE;
 import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.*;
 
 
 public class FoodClientImpl implements FoodClient {
-    private static final String API_URL = "https://api.nal.usda.gov/fdc/v1";
-    private static final String FOODS = "foods";
+    private static final String SPACE_SYMBOL = "%20";
     private static final String CANNOT_GET_DATA_FROM_API = "Cannot get data from api!";
-    private static final String INVALID_DATA_FROM_API = "Invalid data from api!";
+    private static final String GENERAL_SEARCH = "/search?generalSearchInput=";
+    private static final String API_KEY_PARAM = "api_key=";
+    private static final String REQUIRE_ALL_WORDS_TRUE_PARAM = "&requireAllWords=true";
+    private static final String SEPARATOR = "/";
 
     private final HttpClient client;
     private final String apiKey;
@@ -41,79 +41,67 @@ public class FoodClientImpl implements FoodClient {
 
     @Override
     public Collection<Food> getFoodByName(String name) throws FoodNotFoundException {
-        name = String.join("%20", name.split(" "));
-        String URL = API_URL + "/search?generalSearchInput=" + name + "&requireAllWords=true&api_key=" + apiKey;
+        name = String.join(SPACE_SYMBOL, name.split(DELIMITER));
 
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(URL)).build();
         try {
-            String jsonResponse = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
-
-            JsonObject obj = new Gson().fromJson(jsonResponse, JsonObject.class);
-            String jsonFoods = obj.get(FOODS).toString();
-
-            Type type = new TypeToken<List<Food>>() {
-            }.getType();
-            return gson.fromJson(jsonFoods, type);
+            return sendGeneralSearchRequest(name);
         } catch (IOException | InterruptedException ex) {
             throw new FoodNotFoundException(CANNOT_GET_DATA_FROM_API);
         } catch (Exception ex) {
-            throw new IllegalArgumentException(INVALID_DATA_FROM_API);
-        }
-    }
-
-    @Override
-    public FoodReport getFoodReportById(long id) throws FoodIdNotFoundException {
-        String URL = API_URL + "/" + id + "?api_key=" + apiKey;
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(URL)).build();
-        try {
-            String jsonResponse = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
-            JsonObject obj = new Gson().fromJson(jsonResponse, JsonObject.class);
-
-            long fdcId = Long.parseLong(obj.get(FDC_ID_FIELD).getAsString());
-            String description = obj.get(DESC_FIELD).getAsString();
-            String ingredients = obj.get(INGREDIENTS_FIELD).getAsString();
-            String labelNutrients = obj.get(NUTRIENTS_FIELD).toString();
-            JsonObject nutrients = new Gson().fromJson(labelNutrients, JsonObject.class);
-
-            FoodReport report = new FoodReport(fdcId, description, ingredients);
-            report.addNutrient(parseJsonObject(nutrients, CALORIES_FIELD));
-            report.addNutrient(parseJsonObject(nutrients, PROTEIN_FIELD));
-            report.addNutrient(parseJsonObject(nutrients, FAT_FIELD));
-            report.addNutrient(parseJsonObject(nutrients, CARBOHYDRATES_FIELD));
-            report.addNutrient(parseJsonObject(nutrients, FIBER_FIELD));
-
-            return report;
-        } catch (IOException | InterruptedException ex) {
-            throw new FoodIdNotFoundException(CANNOT_GET_DATA_FROM_API);
-        } catch (Exception ex) {
-            throw new IllegalArgumentException(INVALID_DATA_FROM_API);
+            throw new FoodNotFoundException(NO_FOODS_WERE_FOUND_MESSAGE);
         }
     }
 
     @Override
     public Collection<Food> getFoodByBarcode(String barcode) throws FoodBarcodeNotFoundException {
-        String URL = API_URL + "/search?generalSearchInput=" + barcode + "&requireAllWords=true&api_key=" + apiKey;
-
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(URL)).build();
         try {
-            String jsonResponse = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
-
-            JsonObject obj = new Gson().fromJson(jsonResponse, JsonObject.class);
-            String jsonFoods = obj.get(FOODS).toString();
-
-            Type type = new TypeToken<List<Food>>() {
-        }.getType();
-            return gson.fromJson(jsonFoods, type);
+            return sendGeneralSearchRequest(barcode);
         } catch (IOException | InterruptedException ex) {
             throw new FoodBarcodeNotFoundException(CANNOT_GET_DATA_FROM_API);
         } catch (Exception ex) {
-            throw new IllegalArgumentException(INVALID_DATA_FROM_API);
+            throw new FoodBarcodeNotFoundException(NO_FOODS_WERE_FOUND_MESSAGE);
         }
     }
 
-    private Nutrient parseJsonObject(JsonObject nutrients, String label) {
-        JsonElement obj = nutrients.get(label);
-        double value = Double.parseDouble(obj.getAsJsonObject().get(VALUE_FIELD).toString());
-        return new Nutrient(label, value);
+    @Override
+    public Food getFoodReportById(long id) throws FoodIdNotFoundException {
+        try {
+            return sendSearchRequestById(id);
+        } catch (IOException | InterruptedException ex) {
+            throw new FoodIdNotFoundException(CANNOT_GET_DATA_FROM_API);
+        } catch (Exception ex) {
+            throw new FoodIdNotFoundException(NO_FOODS_WERE_FOUND_MESSAGE);
+        }
+    }
+
+    private Collection<Food> sendGeneralSearchRequest(String name) throws IOException, InterruptedException {
+        String url = API_URL + GENERAL_SEARCH + name + REQUIRE_ALL_WORDS_TRUE_PARAM + "&" + API_KEY_PARAM + apiKey;
+        HttpRequest request = createHttpRequest(url);
+        JsonObject obj = sendRequest(request);
+
+        if (!obj.has(FOODS)) {
+            throw new IllegalArgumentException(NO_FOODS_WERE_FOUND_MESSAGE);
+        }
+
+        String jsonFoods = obj.get(FOODS).toString();
+        Type type = new TypeToken<List<Food>>() {
+        }.getType();
+        return gson.fromJson(jsonFoods, type);
+    }
+
+    private Food sendSearchRequestById(long fdcId) throws IOException, InterruptedException {
+        String url = API_URL + SEPARATOR + fdcId + "?" + API_KEY_PARAM + apiKey;
+        HttpRequest request = createHttpRequest(url);
+        JsonObject obj = sendRequest(request);
+        return gson.fromJson(obj, Food.class);
+    }
+
+    private JsonObject sendRequest(HttpRequest request) throws IOException, InterruptedException {
+        String jsonResponse = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        return new Gson().fromJson(jsonResponse, JsonObject.class);
+    }
+
+    private HttpRequest createHttpRequest(String url) {
+        return HttpRequest.newBuilder().uri(URI.create(url)).build();
     }
 }

@@ -16,11 +16,11 @@ import java.nio.file.Paths;
 import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.*;
 
 public class FoodRepositoryImpl implements FoodRepository {
-
     private static final String NO_DATA_MESSAGE_FORMAT = "No data for %s in cache";
-    private String pathFoodNameDir;
-    private String pathFoodIdDir;
-    private String pathFoodBarcodeDir;
+
+    private final String pathFoodNameDir;
+    private final String pathFoodIdDir;
+    private final String pathFoodBarcodeDir;
 
     public FoodRepositoryImpl(Path pathHome) {
         pathFoodNameDir = Paths.get(pathHome.toString(), FOOD_NAME_DIR).toString();
@@ -72,7 +72,6 @@ public class FoodRepositoryImpl implements FoodRepository {
         } catch (IOException ex) {
             throw new FoodIdNotFoundException(String.format(NO_DATA_MESSAGE_FORMAT, id));
         }
-
     }
 
     @Override
@@ -84,7 +83,6 @@ public class FoodRepositoryImpl implements FoodRepository {
         } catch (IOException ex) {
             throw new FoodNotFoundException(String.format(NO_DATA_MESSAGE_FORMAT, name));
         }
-
     }
 
     @Override
@@ -96,7 +94,6 @@ public class FoodRepositoryImpl implements FoodRepository {
         } catch (IOException ex) {
             throw new FoodBarcodeNotFoundException(String.format(NO_DATA_MESSAGE_FORMAT, code));
         }
-
     }
 
     @Override

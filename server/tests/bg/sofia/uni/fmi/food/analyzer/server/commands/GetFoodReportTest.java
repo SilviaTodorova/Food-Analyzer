@@ -6,8 +6,10 @@ import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.FoodRepository;
 import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodBarcodeNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodIdNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodNotFoundException;
-import bg.sofia.uni.fmi.food.analyzer.server.models.FoodReport;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.ImageNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.models.Food;
 import bg.sofia.uni.fmi.food.analyzer.server.models.Nutrient;
+import bg.sofia.uni.fmi.food.analyzer.server.models.Value;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,9 +17,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants.NO_FOODS_WERE_FOUND_MESSAGE;
+import java.util.ArrayList;
+
+import static bg.sofia.uni.fmi.food.analyzer.server.GlobalConstants.GET_DATA_FROM_API;
+import static bg.sofia.uni.fmi.food.analyzer.server.GlobalConstants.GET_DATA_FROM_FILE_SYSTEM;
 import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.*;
-import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.DESC_FIELD;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +31,7 @@ public class GetFoodReportTest {
     private static final String RESPONSE = "some text";
     private static final String DESCRIPTION = "some description";
     private static final String INGREDIENTS = "some ingredients";
-    private static final double FAT_VALUE = 10.56;
+    private static final double NUTRIENT_VALUE = 10.56;
 
     @Mock
     private FoodRepository repositoryMock;
@@ -43,19 +47,31 @@ public class GetFoodReportTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testExecuteCommandThrowsIllegalArgumentExceptionWithLessArguments() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
+    public void testExecuteCommandThrowsIllegalArgumentExceptionWithLessArguments()
+            throws FoodIdNotFoundException,
+            FoodBarcodeNotFoundException,
+            FoodNotFoundException,
+            ImageNotFoundException {
         // Arrange, Act & Assert
-        testCommand.execute(asList());
+        testCommand.execute(new ArrayList<>());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testExecuteCommandThrowsIllegalArgumentExceptionWithMoreArguments() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
+    public void testExecuteCommandThrowsIllegalArgumentExceptionWithMoreArguments()
+            throws FoodIdNotFoundException,
+            FoodBarcodeNotFoundException,
+            FoodNotFoundException,
+            ImageNotFoundException {
         // Arrange, Act & Assert
         testCommand.execute(asList(new String[2]));
     }
 
     @Test
-    public void testExecuteCommandWithDataFromCache() throws FoodIdNotFoundException, FoodNotFoundException, FoodBarcodeNotFoundException {
+    public void testExecuteCommandWithDataFromFileSystem()
+            throws FoodIdNotFoundException,
+            FoodNotFoundException,
+            FoodBarcodeNotFoundException,
+            ImageNotFoundException {
         // Arrange
         when(repositoryMock.checkFoodExistById(FDC_ID))
                 .thenReturn(true);
@@ -67,63 +83,48 @@ public class GetFoodReportTest {
         String result = testCommand.execute(asList(String.valueOf(FDC_ID)));
 
         // Assert
-        Assert.assertEquals(formatResponse(String.valueOf(FDC_ID), RESPONSE), result);
+        Assert.assertEquals(GET_DATA_FROM_FILE_SYSTEM, RESPONSE, result);
     }
 
-    @Test
-    public void testExecuteCommandWithDataFromApiNoResult() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
-        // Arrange
-        when(repositoryMock.checkFoodExistById(FDC_ID))
-                .thenReturn(false);
-
-        when(clientMock.getFoodReportById(10))
-                .thenReturn(null);
-
-        // Act
+    @Test(expected = FoodIdNotFoundException.class)
+    public void testExecuteCommandThrowsFoodIdNotFoundException()
+            throws FoodIdNotFoundException,
+            FoodBarcodeNotFoundException,
+            FoodNotFoundException,
+            ImageNotFoundException {
+        // Arrange, Act & Assert
         String result = testCommand.execute(asList(String.valueOf(FDC_ID)));
-
-        // Assert
-        Assert.assertEquals(formatResponse(String.valueOf(FDC_ID), NO_FOODS_WERE_FOUND_MESSAGE), result);
     }
 
     @Test
-    public void testExecuteCommandWithDataFromApi() throws FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
+    public void testExecuteCommandWithDataFromApi()
+            throws FoodIdNotFoundException,
+            FoodBarcodeNotFoundException,
+            FoodNotFoundException,
+            ImageNotFoundException {
         // Arrange
         when(repositoryMock.checkFoodExistById(FDC_ID))
                 .thenReturn(false);
 
-        FoodReport report = new FoodReport(FDC_ID, DESCRIPTION, INGREDIENTS);
-        report.addNutrient(new Nutrient(FAT_FIELD, FAT_VALUE));
+        Nutrient nutrient = new Nutrient();
+        nutrient.setFat(new Value(NUTRIENT_VALUE));
+        nutrient.setCalories(new Value(NUTRIENT_VALUE));
+        nutrient.setCarbohydrates(new Value(NUTRIENT_VALUE));
+        nutrient.setFiber(new Value(NUTRIENT_VALUE));
+        nutrient.setProtein(new Value(NUTRIENT_VALUE));
+        Food food = new Food(FDC_ID, EMPTY_STRING, DESCRIPTION, INGREDIENTS, nutrient);
 
         when(clientMock.getFoodReportById(FDC_ID))
-                .thenReturn(report);
+                .thenReturn(food);
 
         // Act
         String result = testCommand.execute(asList(String.valueOf(FDC_ID)));
 
         // Assert
         StringBuilder builder = new StringBuilder();
-        append(builder, DESC_FIELD, DESCRIPTION);
-        append(builder, INGREDIENTS_FIELD, INGREDIENTS);
-        append(builder, FAT_FIELD, String.format("%.2f", FAT_VALUE));
-        Assert.assertEquals(formatResponse(String.valueOf(FDC_ID), builder.toString()), result);
-    }
-
-    private String formatResponse(String param, String response) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("-------- Search Results for fdcId: ")
-                .append(param)
-                .append(" --------")
-                .append(System.lineSeparator())
-                .append(System.lineSeparator())
-                .append(response);
-
-        return builder.toString();
-    }
-
-    private void append(StringBuilder builder, String field, String value) {
-        if (!IS_NULL_OR_EMPTY_FIELD_PREDICATE.test(value)) {
-            builder.append(field).append(": ").append(value).append(System.lineSeparator());
-        }
+        builder.append(food);
+        builder.append(System.lineSeparator());
+        builder.append(nutrient);
+        Assert.assertEquals(GET_DATA_FROM_API, builder.toString(), result);
     }
 }

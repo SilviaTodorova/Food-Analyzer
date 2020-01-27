@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.food.analyzer.server.core;
 
+import bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants;
 import bg.sofia.uni.fmi.food.analyzer.server.commands.contracts.Command;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.CommandFactory;
 import bg.sofia.uni.fmi.food.analyzer.server.core.contracts.CommandParser;
@@ -19,11 +20,11 @@ import java.nio.channels.SocketChannel;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static bg.sofia.uni.fmi.food.analyzer.server.commands.common.CommandConstants.*;
 import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.*;
 
 import bg.sofia.uni.fmi.food.analyzer.server.core.clients.FoodClientImpl;
@@ -31,6 +32,7 @@ import bg.sofia.uni.fmi.food.analyzer.server.core.repositories.FoodRepositoryImp
 import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodBarcodeNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodIdNotFoundException;
 import bg.sofia.uni.fmi.food.analyzer.server.exceptions.FoodNotFoundException;
+import bg.sofia.uni.fmi.food.analyzer.server.exceptions.ImageNotFoundException;
 
 public class FoodAnalyzerServer {
     private final CommandFactory commandFactory;
@@ -47,31 +49,6 @@ public class FoodAnalyzerServer {
 
         HttpClient client = HttpClient.newHttpClient();
         clientFood = new FoodClientImpl(client, API_KEY);
-    }
-
-    public void test() {
-        List<String> cmds = new ArrayList<>();
-
-        cmds.add("get-food beef noodle soup");
-        cmds.add("get-food-report 415269");
-        cmds.add("get-food-report 570429");
-        // cmds.add("get-food-by-barcode --img=D:\\JavaProjects\\ModernJavaTechnology\\food-analyzer\\server\\resources\\chia.png");
-        cmds.add("get-food-by-barcode --img=D:\\Photos\\BarcodeImage.jpg --code=009800146130");
-
-        for (String commandAsString : cmds) {
-            String commandName = commandParser.parseCommand(commandAsString);
-            Command command = commandFactory.createCommand(commandName, repository, clientFood);
-            List<String> parameters = commandParser.parseParameters(commandAsString);
-
-            String executionResult;
-            try {
-                executionResult = command.execute(parameters);
-            } catch (Exception ex) {
-                executionResult = ex.getMessage();
-            }
-
-            System.out.println(executionResult);
-        }
     }
 
     public void start() {
@@ -93,7 +70,7 @@ public class FoodAnalyzerServer {
                     try {
                         Thread.sleep(SLEEP_MILLIS);
                     } catch (InterruptedException e) {
-                        System.out.printf(ERROR_READ_CHANNEL_MESSAGE_FORMAT);
+                        System.out.println(ERROR_READ_CHANNEL_MESSAGE);
                     }
                     continue;
                 }
@@ -102,77 +79,94 @@ public class FoodAnalyzerServer {
             }
 
         } catch (Exception ex) {
-            System.out.printf(ERROR_READ_CHANNEL_MESSAGE_FORMAT);
+            System.out.println(ERROR_READ_CHANNEL_MESSAGE);
         }
     }
 
-    private void iterateClients(Selector selector, ByteBuffer buffer) throws IOException {
+    private void iterateClients(Selector selector, ByteBuffer buffer) {
         Set<SelectionKey> selectedKeys = selector.selectedKeys();
         Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 
         while (keyIterator.hasNext()) {
-            SelectionKey key = keyIterator.next();
-            if (key.isReadable()) {
-                SocketChannel sc = (SocketChannel) key.channel();
+            try {
+                SelectionKey key = keyIterator.next();
+                if (key.isReadable()) {
+                    SocketChannel sc = (SocketChannel) key.channel();
 
-                buffer.clear();
-                int r = sc.read(buffer);
-                if (r <= 0) {
-                    sc.close();
-                    break;
-                }
-
-                buffer.flip();
-
-                String commandAsString = new String(buffer.array(), 0, buffer.limit());
-
-                if (commandAsString.equalsIgnoreCase(DISCONNECT_COMMAND)) {
-                    sc.close();
-                    continue;
-                }
-
-                try {
-                    processCommand(commandAsString, sc, buffer);
-                } catch (Exception ex) {
-                    // Write
                     buffer.clear();
-                    buffer.put(ex.getMessage().getBytes());
+                    int r = sc.read(buffer);
+                    if (r <= 0) {
+                        sc.close();
+                        break;
+                    }
+
                     buffer.flip();
-                    sc.write(buffer);
+
+                    String commandAsString = new String(buffer.array(), 0, buffer.limit());
+                    System.out.printf("[ %s IP: %s]  %s%n",
+                            LocalDateTime.now().format(DATE_FORMATTER),
+                            sc.getLocalAddress(),
+                            commandAsString);
+
+                    if (commandAsString.equalsIgnoreCase(DISCONNECT_COMMAND)) {
+                        sc.close();
+                        continue;
+                    }
+
+                    processCommand(commandAsString, sc, buffer);
+                } else if (key.isAcceptable()) {
+                    ServerSocketChannel sockChannel = (ServerSocketChannel) key.channel();
+                    SocketChannel accept = sockChannel.accept();
+                    accept.configureBlocking(false);
+                    accept.register(selector, SelectionKey.OP_READ);
                 }
 
-
-            } else if (key.isAcceptable()) {
-                ServerSocketChannel sockChannel = (ServerSocketChannel) key.channel();
-                SocketChannel accept = sockChannel.accept();
-                accept.configureBlocking(false);
-                accept.register(selector, SelectionKey.OP_READ);
+                keyIterator.remove();
+            } catch (Exception ex) {
+                System.out.println(ERROR_READ_CHANNEL_MESSAGE);
             }
-
-            keyIterator.remove();
         }
     }
 
-    private void processCommand(String commandAsString, SocketChannel sc, ByteBuffer buffer) throws IOException, FoodIdNotFoundException, FoodBarcodeNotFoundException, FoodNotFoundException {
-        if (commandAsString == null || commandAsString.trim().equals("")) {
-            throw new IllegalArgumentException(COMMAND_CANNOT_BE_NULL_OR_EMPTY);
+    private void processCommand(String commandAsString, SocketChannel sc, ByteBuffer buffer)
+            throws IOException {
+        StringBuilder builder = new StringBuilder();
+        builder.append(SEPARATOR)
+                .append(SEARCH_RESULTS)
+                .append(DELIMITER)
+                .append(SEPARATOR)
+                .append(System.lineSeparator());
+
+        try {
+            String commandName = commandParser.parseCommand(commandAsString);
+            Command command = commandFactory.createCommand(commandName, repository, clientFood);
+            List<String> parameters = commandParser.parseParameters(commandAsString);
+
+            String executionResult = command.execute(parameters) + System.lineSeparator();
+            builder.append(executionResult);
+
+            if (commandName.equals(CommandConstants.DISCONNECT_COMMAND)) {
+                sc.close();
+            }
+
+            sendMessage(sc, buffer, builder.toString());
+
+        } catch (FoodIdNotFoundException |
+                FoodNotFoundException |
+                FoodBarcodeNotFoundException |
+                ImageNotFoundException ex) {
+
+            builder.append(ex.getMessage()).append(System.lineSeparator());
+            sendMessage(sc, buffer, builder.toString());
+        } catch (Exception ex) {
+            sendMessage(sc, buffer, ex.getMessage() + System.lineSeparator());
         }
+    }
 
-        String commandName = commandParser.parseCommand(commandAsString);
-        Command command = commandFactory.createCommand(commandName, repository, clientFood);
-        List<String> parameters = commandParser.parseParameters(commandAsString);
-        String executionResult = command.execute(parameters) + System.lineSeparator();
-
-        if (commandName.equals(DISCONNECT_COMMAND)) {
-            sc.close();
-        }
-
-        // Write
+    private void sendMessage(SocketChannel sc, ByteBuffer buffer, String message) throws IOException {
         buffer.clear();
-        buffer.put(executionResult.getBytes());
+        buffer.put(message.getBytes());
         buffer.flip();
         sc.write(buffer);
-
-        System.out.printf("[ %s ] %s", LocalDateTime.now().format(DATE_FORMATTER), commandAsString);
     }
 }
