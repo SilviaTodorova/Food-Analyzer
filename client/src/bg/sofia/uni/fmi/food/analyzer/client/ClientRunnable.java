@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import static bg.sofia.uni.fmi.food.analyzer.client.GlobalConstants.BUFFER_SIZE;
-import static bg.sofia.uni.fmi.food.analyzer.client.GlobalConstants.ERROR_READ_DATA_FROM_SERVER_MESSAGE_FORMAT;
+import static bg.sofia.uni.fmi.food.analyzer.client.GlobalConstants.DISCONNECTED_FROM_SERVER;
 
 
 public class ClientRunnable implements Runnable {
@@ -27,7 +27,7 @@ public class ClientRunnable implements Runnable {
                 System.out.print(reply);
             }
         } catch (IOException e) {
-            System.out.println(ERROR_READ_DATA_FROM_SERVER_MESSAGE_FORMAT);
+            System.out.println(DISCONNECTED_FROM_SERVER);
         }
     }
 }

@@ -30,6 +30,10 @@ public class FoodAnalyzerClient {
                 buffer.put(command.getBytes());
                 buffer.flip();
                 socketChannel.write(buffer);
+
+                if (command.equals(DISCONNECT_COMMAND)) {
+                    break;
+                }
             }
 
         } catch (Exception ex) {
