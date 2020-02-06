@@ -37,18 +37,17 @@ import bg.sofia.uni.fmi.food.analyzer.server.exceptions.ImageNotFoundException;
 public class FoodAnalyzerServer {
     private final CommandFactory commandFactory;
     private final CommandParser commandParser;
+
     private final FoodRepository repository;
     private final FoodClient clientFood;
-
-    private static final Path PATH = FileSystems.getDefault().getPath(REPOSITORY_DIR).toAbsolutePath();
 
     public FoodAnalyzerServer() {
         commandFactory = new CommandFactoryImpl();
         commandParser = new CommandParserImpl();
-        repository = new FoodRepositoryImpl(PATH);
 
-        HttpClient client = HttpClient.newHttpClient();
-        clientFood = new FoodClientImpl(client, API_KEY);
+        Path path = FileSystems.getDefault().getPath(REPOSITORY_DIR).toAbsolutePath();
+        repository = new FoodRepositoryImpl(path);
+        clientFood = new FoodClientImpl(HttpClient.newHttpClient(), API_KEY);
     }
 
     public void start() {

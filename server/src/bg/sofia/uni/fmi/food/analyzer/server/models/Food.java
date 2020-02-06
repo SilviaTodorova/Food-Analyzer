@@ -39,12 +39,17 @@ public class Food {
         return labelNutrients;
     }
 
+    public String getIngredients() {
+        return ingredients;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         append(builder, FDC_ID_FIELD, String.valueOf(getFdcId()));
         append(builder, GTIN_UPC_FIELD, getGtinUpc());
         append(builder, DESC_FIELD, getDescription());
+        append(builder, INGREDIENTS_FIELD, getIngredients());
         return builder.toString();
     }
 

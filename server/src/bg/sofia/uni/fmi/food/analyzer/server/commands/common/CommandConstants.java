@@ -16,15 +16,12 @@ public class CommandConstants {
 
     public static final String NO_FOODS_WERE_FOUND_MESSAGE = "No foods were found!";
 
-    public static final String COMMAND_CANNOT_BE_NULL_OR_EMPTY = "Command cannot be null or empty.";
-
     public static final String DISCONNECT_COMMAND = "disconnect";
     public static final String GET_FOOD_COMMAND = "get-food";
     public static final String GET_FOOD_REPORT_COMMAND = "get-food-report";
     public static final String GET_FOOD_BY_BARCODE_COMMAND = "get-food-by-barcode";
 
     public static final String SEPARATOR = "--------";
-    public static final String SEARCH_RESULTS_FOR = " Search Results for ";
     public static final String SEARCH_RESULTS = " Search Results ";
     public static final String FORMAT = ": ";
 }

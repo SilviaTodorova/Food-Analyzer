@@ -17,6 +17,7 @@ import static bg.sofia.uni.fmi.food.analyzer.server.core.BarcodeConverter.decode
 public class GetFoodByBarcode implements Command {
     private static final String INVALID_NUMBER_OF_ARGUMENTS_ONE_OR_TWO_MESSAGE_FORMAT =
             "Invalid number of arguments. Expected: %d or %d, Received: %d";
+
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS_ONE_CRITERIA = 1;
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS_TWO_CRITERIAS = 2;
     private static final String INVALID_PARAMETERS = "Invalid parameters";

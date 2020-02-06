@@ -19,8 +19,13 @@ public class CommandFactoryImpl implements CommandFactory {
 
     @Override
     public Command createCommand(String commandTypeAsString, FoodRepository repository, FoodClient client) {
-        String commandTypeAsStringUpperCase = commandTypeAsString.replaceAll(REGEX_LETTERS, EMPTY_STRING).toUpperCase();
-        boolean validEnum = Arrays.stream(CommandType.values()).anyMatch(en->en.name().equals(commandTypeAsStringUpperCase));
+        String commandTypeAsStringUpperCase = commandTypeAsString
+                .replaceAll(REGEX_LETTERS, EMPTY_STRING)
+                .toUpperCase();
+
+        boolean validEnum = Arrays.stream(CommandType.values())
+                .anyMatch(en->en.name()
+                        .equals(commandTypeAsStringUpperCase));
 
         if(!validEnum) {
             throw new IllegalArgumentException(String.format(INVALID_COMMAND, commandTypeAsString));

@@ -11,7 +11,8 @@ public class GlobalConstants {
     public static final String ERROR_READ_CHANNEL_MESSAGE = "error while reading from channel";
 
     public static final String SERVER_RUNNING_MESSAGE_FORMAT = "server is running on %s:%d%n";
-    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    public static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public static final String NO_A_SUCH_FILE = "There is no a such file";
     public static final String NO_BARCODE_IN_THE_IMAGE = "There is no barcode in the image";
@@ -39,6 +40,5 @@ public class GlobalConstants {
     public static final String DESC_FIELD = "description";
     public static final String INGREDIENTS_FIELD = "ingredients";
     public static final String FOODS = "foods";
-    public static final String BARCODE = "barcode";
 }
 
