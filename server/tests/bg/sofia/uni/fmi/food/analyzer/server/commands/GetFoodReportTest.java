@@ -18,12 +18,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static bg.sofia.uni.fmi.food.analyzer.server.GlobalConstants.GET_DATA_FROM_API;
 import static bg.sofia.uni.fmi.food.analyzer.server.GlobalConstants.GET_DATA_FROM_FILE_SYSTEM;
 import static bg.sofia.uni.fmi.food.analyzer.server.common.GlobalConstants.*;
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GetFoodReportTest {
@@ -80,7 +81,7 @@ public class GetFoodReportTest {
                 .thenReturn(RESPONSE);
 
         // Act
-        String result = testCommand.execute(asList(String.valueOf(FDC_ID)));
+        String result = testCommand.execute(Collections.singletonList(String.valueOf(FDC_ID)));
 
         // Assert
         Assert.assertEquals(GET_DATA_FROM_FILE_SYSTEM, RESPONSE, result);
@@ -93,7 +94,7 @@ public class GetFoodReportTest {
             FoodNotFoundException,
             ImageNotFoundException {
         // Arrange, Act & Assert
-        String result = testCommand.execute(asList(String.valueOf(FDC_ID)));
+        String result = testCommand.execute(Collections.singletonList(String.valueOf(FDC_ID)));
     }
 
     @Test
@@ -118,7 +119,7 @@ public class GetFoodReportTest {
                 .thenReturn(food);
 
         // Act
-        String result = testCommand.execute(asList(String.valueOf(FDC_ID)));
+        String result = testCommand.execute(Collections.singletonList(String.valueOf(FDC_ID)));
 
         // Assert
         StringBuilder builder = new StringBuilder();

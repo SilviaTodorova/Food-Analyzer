@@ -20,6 +20,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static bg.sofia.uni.fmi.food.analyzer.server.GlobalConstants.GET_DATA_FROM_API;
@@ -92,7 +93,7 @@ public class GetFoodByBarcodeTest {
             FoodNotFoundException,
             ImageNotFoundException {
         // Arrange, Act & Assert
-        String result = testCommand.execute(asList(BARCODE));
+        String result = testCommand.execute(Collections.singletonList(BARCODE));
     }
 
     @Test
@@ -109,7 +110,7 @@ public class GetFoodByBarcodeTest {
                 .thenReturn(RESPONSE);
 
         // Act
-        String result = testCommand.execute(asList(CODE_FLAG + BARCODE));
+        String result = testCommand.execute(Collections.singletonList(CODE_FLAG + BARCODE));
 
         // Assert
         Assert.assertEquals(GET_DATA_FROM_FILE_SYSTEM, RESPONSE, result);
@@ -129,7 +130,7 @@ public class GetFoodByBarcodeTest {
                 .thenReturn(RESPONSE);
 
         // Act
-        String result = testCommand.execute(asList(CODE_IMG + imgPath));
+        String result = testCommand.execute(Collections.singletonList(CODE_IMG + imgPath));
 
         // Assert
         Assert.assertEquals(GET_DATA_FROM_FILE_SYSTEM, RESPONSE, result);
@@ -142,7 +143,7 @@ public class GetFoodByBarcodeTest {
             FoodNotFoundException,
             ImageNotFoundException {
         // Arrange, Act & Assert
-        String result = testCommand.execute(asList(CODE_FLAG + BARCODE));
+        String result = testCommand.execute(Collections.singletonList(CODE_FLAG + BARCODE));
     }
 
     @Test(expected = ImageNotFoundException.class)
@@ -152,7 +153,7 @@ public class GetFoodByBarcodeTest {
             FoodNotFoundException,
             ImageNotFoundException {
         // Arrange, Act & Assert
-        String result = testCommand.execute(asList(CODE_IMG + fakeImagePath));
+        String result = testCommand.execute(Collections.singletonList(CODE_IMG + fakeImagePath));
     }
 
     @Test(expected = ImageNotFoundException.class)
@@ -162,7 +163,7 @@ public class GetFoodByBarcodeTest {
             FoodNotFoundException,
             ImageNotFoundException {
         // Arrange, Act & Assert
-        String result = testCommand.execute(asList(CODE_IMG + fakePath));
+        String result = testCommand.execute(Collections.singletonList(CODE_IMG + fakePath));
     }
 
     @Test
@@ -180,7 +181,7 @@ public class GetFoodByBarcodeTest {
                 .thenReturn(List.of(food));
 
         // Act
-        String result = testCommand.execute(asList(CODE_FLAG + BARCODE));
+        String result = testCommand.execute(Collections.singletonList(CODE_FLAG + BARCODE));
 
         // Assert
         Assert.assertEquals(GET_DATA_FROM_API,

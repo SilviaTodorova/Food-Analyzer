@@ -40,9 +40,6 @@ public class FoodClientTest {
     private static final String FOODS_VALID_JSON = "{\"foods\":[{\"fdcId\":338105,\"description\":" +
             "\"Beef and noodles\",\"gtinUpc\":\"009800146130\"}]}";
 
-    private static final String FOODS_INVALID_JSON = "{\"food\":[{\"fdcId\":338105,\"description\":" +
-            "\"Beef and noodles\",\"gtinUpc\":\"009800146130\"}]}";
-
     @Mock
     private HttpClient httpClientMock;
 
@@ -74,13 +71,7 @@ public class FoodClientTest {
 
     @Test (expected = FoodBarcodeNotFoundException.class)
     public void testGetFoodByBarcodeThrowsFoodBarcodeNotFoundException() throws Exception {
-        // Arrange
-        when(httpClientMock.send(Mockito.any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<String>>any()))
-                .thenReturn(httpResponseMock);
-
-        when(httpResponseMock.body()).thenReturn(FOODS_INVALID_JSON);
-
-        // Act and Assert
+        // Arrange, Act and Assert
         List<Food> actual = new ArrayList<>(client.getFoodByBarcode(BARCODE));
     }
 
@@ -102,13 +93,7 @@ public class FoodClientTest {
 
     @Test (expected = FoodNotFoundException.class)
     public void testGetFoodByNameThrowsFoodNotFoundException() throws Exception {
-        // Arrange
-        when(httpClientMock.send(Mockito.any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<String>>any()))
-                .thenReturn(httpResponseMock);
-
-        when(httpResponseMock.body()).thenReturn(FOODS_INVALID_JSON);
-
-        // Act and Assert
+        // Arrange, Act and Assert
         List<Food> actual = new ArrayList<>(client.getFoodByName(NAME));
     }
 

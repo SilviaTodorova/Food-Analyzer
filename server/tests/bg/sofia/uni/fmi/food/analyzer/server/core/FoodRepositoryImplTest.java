@@ -111,7 +111,7 @@ public class FoodRepositoryImplTest {
         // Arrange
         Path path = Paths.get(pathFoodIdDir, String.valueOf(EXISTING_ID));
         File file = new File(path.toString());
-        writeInFile(file, SOME_TEXT);
+        writeInFile(file);
 
         // Act and Assert
         Assert.assertNotEquals(GET_FOOD_REPORT_BY_ID,
@@ -132,7 +132,7 @@ public class FoodRepositoryImplTest {
         // Arrange
         Path path = Paths.get(pathFoodNameDir, EXISTING_NAME);
         File file = new File(path.toString());
-        writeInFile(file, SOME_TEXT);
+        writeInFile(file);
 
         // Act and Assert
         Assert.assertNotEquals(GET_FOODS_BY_NAME,
@@ -153,7 +153,7 @@ public class FoodRepositoryImplTest {
         // Arrange
         Path path = Paths.get(pathFoodBarcodeDir, EXISTING_BARCODE);
         File file = new File(path.toString());
-        writeInFile(file, SOME_TEXT);
+        writeInFile(file);
 
         // Act and Assert
         Assert.assertNotEquals(GET_FOODS_BY_BARCODE,
@@ -218,9 +218,9 @@ public class FoodRepositoryImplTest {
                 repository.checkFoodExistByName(NOT_EXISTING_NAME));
     }
 
-    private void writeInFile(File file, String text) throws IOException {
+    private void writeInFile(File file) throws IOException {
         try (PrintWriter printWriter = new PrintWriter(file)) {
-            printWriter.write(text);
+            printWriter.write(SOME_TEXT);
         }
     }
 }

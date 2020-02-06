@@ -23,7 +23,7 @@ public class CommandFactoryImplTest {
         Command command = factory.createCommand(EMPTY_STRING, null, null);
 
         // Assert
-        Assert.assertTrue(command instanceof Command);
+        Assert.assertNotNull(command);
     }
 
     @Test
@@ -32,7 +32,7 @@ public class CommandFactoryImplTest {
         Command command = factory.createCommand(GET_FOOD_COMMAND, null, null);
 
         // Assert
-        Assert.assertTrue(command instanceof Command);
+        Assert.assertNotNull(command);
     }
 
     @Test
@@ -41,7 +41,7 @@ public class CommandFactoryImplTest {
         Command command = factory.createCommand(GET_FOOD_REPORT_COMMAND, null, null);
 
         // Assert
-        Assert.assertTrue(command instanceof Command);
+        Assert.assertNotNull(command);
     }
 
     @Test
@@ -50,6 +50,6 @@ public class CommandFactoryImplTest {
         Command command = factory.createCommand(GET_FOOD_BY_BARCODE_COMMAND, null, null);
 
         // Assert
-        Assert.assertTrue(command instanceof Command);
+        Assert.assertNotNull(command);
     }
 }
