@@ -28,6 +28,7 @@ public class ClientRunnable implements Runnable {
             }
         } catch (IOException e) {
             System.out.println(DISCONNECTED_FROM_SERVER);
+            // System.exit(1);
         }
     }
 }

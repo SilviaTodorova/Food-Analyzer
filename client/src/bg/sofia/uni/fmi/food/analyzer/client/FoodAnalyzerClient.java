@@ -12,7 +12,7 @@ public class FoodAnalyzerClient {
         new FoodAnalyzerClient().run();
     }
 
-    public void run() {
+    private void run() {
         try (SocketChannel socketChannel = SocketChannel.open();
              Scanner scanner = new Scanner(System.in)) {
 
@@ -31,7 +31,7 @@ public class FoodAnalyzerClient {
                 buffer.flip();
                 socketChannel.write(buffer);
 
-                if (command.equals(DISCONNECT_COMMAND)) {
+                if (command.equalsIgnoreCase(DISCONNECT_COMMAND)) {
                     break;
                 }
             }
